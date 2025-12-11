@@ -1,3 +1,23 @@
+# ===========================================
+# CLAUDE NOTES - READ THIS FILE FIRST
+# ===========================================
+# Project: NanoArcade Manager
+# GitHub: https://github.com/audioslayer/NanoArcade
+#
+# API Key Location: .config.json (in this folder)
+# Read the key from .config.json when pushing to GitHub
+#
+# TO RELEASE A NEW VERSION:
+# 1. Commit all changes to git
+# 2. Push to GitHub using token from .config.json
+# 3. Create a new git tag (e.g., v1.1, v1.2, v2.0)
+# 4. Create zip file of the project
+# 5. Create GitHub release with the zip attached
+# 6. Include release notes describing what changed
+#
+# CURRENT VERSION: v1.0
+# ===========================================
+
 # OS generated files
 .DS_Store
 Thumbs.db
@@ -12,6 +32,6 @@ desktop.ini
 *.temp
 *.log
 
-# Local config (API keys, secrets)
+# Local config (API keys, secrets - NEVER COMMIT)
 .env
 .config.json
