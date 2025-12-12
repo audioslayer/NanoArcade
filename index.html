@@ -2142,51 +2142,9 @@
 			}
 
 			async function searchTheCoverProject(q, parser) {
-				const images = [];
-				const searchUrl = `https://www.thecoverproject.net/view.php?searchstring=${encodeURIComponent(q)}&searchtype=1`;
-				const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(searchUrl)}`);
-
-				if (!response.ok) return images;
-
-				const html = await response.text();
-				const doc = parser.parseFromString(html, 'text/html');
-
-				// Find game links from search results
-				const gameLinks = doc.querySelectorAll('a[href*="game_id="]');
-				const gameIds = [...new Set(Array.from(gameLinks).map(a => {
-					const match = a.getAttribute('href').match(/game_id=(\d+)/);
-					return match ? match[1] : null;
-				}).filter(Boolean))];
-
-				// Fetch cover details from first few games
-				for (const gameId of gameIds.slice(0, 5)) {
-					try {
-						const gameUrl = `https://www.thecoverproject.net/view.php?game_id=${gameId}`;
-						const gameResponse = await fetch(`https://corsproxy.io/?${encodeURIComponent(gameUrl)}`);
-						if (gameResponse.ok) {
-							const gameHtml = await gameResponse.text();
-							const gameDoc = parser.parseFromString(gameHtml, 'text/html');
-
-							// Find thumbnail images with CDN URLs
-							const thumbImgs = gameDoc.querySelectorAll('img[src*="coverproject.sfo2.cdn.digitaloceanspaces.com"]');
-							thumbImgs.forEach(img => {
-								const thumbUrl = img.getAttribute('src');
-								if (thumbUrl && thumbUrl.includes('_thumb.jpg')) {
-									// Convert thumbnail URL to full image URL (remove _thumb)
-									const fullUrl = thumbUrl.replace('_thumb.jpg', '.jpg');
-									if (!images.find(i => i.full === fullUrl)) {
-										images.push({
-											thumb: thumbUrl,
-											full: fullUrl
-										});
-									}
-								}
-							});
-						}
-					} catch (e) { /* Ignore errors */ }
-					if (images.length >= 15) break;
-				}
-				return images;
+				// The Cover Project's CDN blocks CORS proxies, so we can't reliably fetch their images
+				// Return empty array - TheGamesDB will be the primary source
+				return [];
 			}
 
 			function selectPickerImage(img) {
