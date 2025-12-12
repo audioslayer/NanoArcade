@@ -4,6 +4,14 @@ A beautiful, browser-based tool to manage your retro game collection for RG Nano
 
 ![NanoArcade](assets/images/logo.png)
 
+## Try It Now
+
+**[Launch Live App](https://audioslayer.github.io/NanoArcade/)** - Use instantly in your browser, no download required
+
+Or download this repository for offline use.
+
+---
+
 ## Supported Devices
 
 - **RG Nano** - Anbernic's tiny retro handheld
