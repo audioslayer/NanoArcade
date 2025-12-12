@@ -26,8 +26,14 @@ Or download this repository for offline use.
 - **Onion OS Integration** - Full support for Onion OS folder structure (`Roms/[Console]/Imgs/`)
 - **Auto-Resize** - Images automatically resized to optimal dimensions per device (240px for RG Nano, 250px for Miyoo)
 
+### Top 25 Must-Have Games
+- **Curated Lists** - Top 25 rated games for 16 different consoles
+- **Collection Tracker** - See which must-have games you own vs missing
+- **Quick Upload** - Drag & drop missing ROMs directly into the Top 25 modal
+- **Supported Consoles**: GB, GBC, GBA, NES, SNES, N64, Genesis, Game Gear, Master System, PS1, PC Engine, Neo Geo, Neo Geo Pocket, Atari 2600, Atari Lynx, WonderSwan
+
 ### Box Art Management
-- **Dual Image Sources** - Search both TheGamesDB and The Cover Project for box art
+- **Image Search** - Search TheGamesDB for box art
 - **Upload Local Images** - Drag & drop or browse for local artwork
 - **URL Import** - Paste image URLs directly with automatic download
 - **Smart Processing** - Auto-resize, format conversion, and optimization
@@ -59,6 +65,7 @@ Or download this repository for offline use.
 4. Click "Select ROMs Folder" and choose your device's ROM directory
 5. Click on any console to view and manage your games
 6. Click a game to add/edit box art, or right-click for quick actions
+7. Click the **Top 25** button to see must-have games for that console
 
 ## Folder Structures
 
@@ -110,7 +117,9 @@ The app recognizes and displays icons for:
 ### v1.2
 - Added device selector (RG Nano, Miyoo Mini, Miyoo Flip)
 - Full Onion OS support with Imgs subfolder structure
-- Added The Cover Project as second image source
+- **Top 25 Games feature** - See must-have games per console with owned/missing status
+- Top 25 lists for 16 consoles (400 curated games total)
+- Upload ROMs directly from Top 25 modal
 - Loading spinner for large collections
 - Ultrawide monitor support
 - Clickable stats to navigate to games
@@ -127,7 +136,10 @@ The app recognizes and displays icons for:
 
 ## Credits
 
+- UI based on [Hyperspace](https://html5up.net/hyperspace) by HTML5 UP
 - Box art from [TheGamesDB](https://thegamesdb.net/)
+- Console icons included in the `icons` folder
+- Top 25 game lists curated from community rankings
 
 ## License
 

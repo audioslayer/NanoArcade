@@ -152,6 +152,48 @@
 				font-size: 0.7em;
 			}
 
+			/* Top 25 list styles */
+			.top25-item {
+				display: flex;
+				align-items: center;
+				padding: 0.6em 0.75em;
+				margin-bottom: 0.4em;
+				border-radius: 8px;
+				background: rgba(255,255,255,0.03);
+				transition: background 0.2s;
+			}
+			.top25-item:hover {
+				background: rgba(255,255,255,0.08);
+			}
+			.top25-item.owned {
+				border-left: 3px solid #22c55e;
+			}
+			.top25-item.missing {
+				border-left: 3px solid #ef4444;
+				opacity: 0.8;
+			}
+			.top25-rank {
+				width: 28px;
+				font-weight: bold;
+				color: #f59e0b;
+				font-size: 0.85em;
+			}
+			.top25-icon {
+				width: 24px;
+				text-align: center;
+				margin-right: 0.5em;
+			}
+			.top25-icon.owned { color: #22c55e; }
+			.top25-icon.missing { color: #ef4444; }
+			.top25-name {
+				flex: 1;
+				font-size: 0.85em;
+			}
+			.top25-upload-zone.dragover {
+				border-color: #f59e0b;
+				background: rgba(245, 158, 11, 0.1);
+			}
+
 			.stats-row {
 				display: flex;
 				gap: 2em;
@@ -265,6 +307,11 @@
 				--btn-color: #3b82f6;
 				--btn-shadow: #1d4ed8;
 				--btn-glow: #3b82f663;
+			}
+			.btn-3d.gold {
+				--btn-color: #f59e0b;
+				--btn-shadow: #d97706;
+				--btn-glow: #f59e0b63;
 			}
 
 			/* URL input styling */
@@ -1063,6 +1110,9 @@
 						<button class="btn-3d small cyan" id="filterMissingBtn" onclick="toggleMissingFilter()">
 							<span class="icon solid fa-filter"></span> Missing Art
 						</button>
+						<button class="btn-3d small gold" id="top25Btn" onclick="openTop25Modal()" style="display:none;">
+							<span class="icon solid fa-trophy"></span> Top 25
+						</button>
 						<button class="btn-3d small gray" id="sortBtn" onclick="toggleSort()">
 							<span class="icon solid fa-sort-alpha-down" id="sortIcon"></span> <span id="sortLabel">A-Z</span>
 						</button>
@@ -1126,6 +1176,30 @@
 					<button class="btn-3d small red" onclick="confirmDeleteGame()"><span class="icon solid fa-trash"></span></button>
 				</div>
 				<input type="file" id="localImageInput" accept="image/*" style="display:none;" onchange="handleLocalImage(event)">
+			</div>
+		</div>
+
+		<!-- Top 25 Games Modal -->
+		<div class="modal-overlay" id="top25Modal">
+			<div class="modal-box" style="max-width: 550px;">
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em;">
+					<h3 style="color: #f59e0b; font-size: 1.1em; margin: 0; text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);">
+						<span class="icon solid fa-trophy" style="margin-right: 0.5em;"></span>Top 25 <span id="top25ConsoleName">Games</span>
+					</h3>
+					<button class="close-btn" onclick="closeModal('top25Modal')">&times;</button>
+				</div>
+				<div style="margin-bottom: 1em; display: flex; gap: 1em; align-items: center;">
+					<div class="top25-stats">
+						<span style="color: #22c55e;"><span class="icon solid fa-check"></span> <span id="top25Owned">0</span> owned</span>
+						<span style="color: #ef4444; margin-left: 1em;"><span class="icon solid fa-times"></span> <span id="top25Missing">0</span> missing</span>
+					</div>
+				</div>
+				<div id="top25List" style="max-height: 400px; overflow-y: auto; margin: 0 -1em; padding: 0 1em;"></div>
+				<div class="top25-upload-zone" id="top25DropZone" style="margin-top: 1em; border: 2px dashed rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 1em; text-align: center; transition: all 0.2s;">
+					<span class="icon solid fa-cloud-upload-alt" style="font-size: 1.5em; color: #f59e0b; margin-bottom: 0.5em; display: block;"></span>
+					<p style="margin: 0; font-size: 0.85em; color: rgba(255,255,255,0.6);">Drag & drop missing ROMs here or <a href="#" onclick="document.getElementById('top25FileInput').click(); return false;" style="color: #f59e0b;">browse</a></p>
+				</div>
+				<input type="file" id="top25FileInput" multiple style="display:none;" onchange="handleTop25Upload(event)">
 			</div>
 		</div>
 
@@ -1451,6 +1525,442 @@
 						'ScummVM': ['scummvm', 'ScummVM', 'SCUMMVM']
 					}
 				}
+			};
+
+			// Top 25 rated games per console (for "must have" list feature)
+			const topGamesData = {
+				'GBA': [
+					'Legend of Zelda, The - The Minish Cap',
+					'Metroid - Zero Mission',
+					'Metroid Fusion',
+					'Pokemon Emerald',
+					'Pokemon FireRed',
+					'Pokemon LeafGreen',
+					'Castlevania - Aria of Sorrow',
+					'Castlevania - Harmony of Dissonance',
+					'Advance Wars',
+					'Advance Wars 2 - Black Hole Rising',
+					'Golden Sun',
+					'Golden Sun - The Lost Age',
+					'Fire Emblem',
+					'Fire Emblem - The Sacred Stones',
+					'Mario & Luigi - Superstar Saga',
+					'Final Fantasy VI Advance',
+					'Final Fantasy Tactics Advance',
+					'Legend of Zelda, The - A Link to the Past',
+					'Super Mario Advance 4 - Super Mario Bros. 3',
+					'Wario Land 4',
+					'WarioWare, Inc. - Mega Microgames!',
+					'Kirby & The Amazing Mirror',
+					'Mega Man Zero',
+					'Sonic Advance',
+					'Mario Kart - Super Circuit'
+				],
+				'GB': [
+					'Legend of Zelda, The - Link\'s Awakening',
+					'Tetris',
+					'Pokemon Red',
+					'Pokemon Blue',
+					'Pokemon Yellow',
+					'Super Mario Land 2 - 6 Golden Coins',
+					'Super Mario Land',
+					'Donkey Kong',
+					'Metroid II - Return of Samus',
+					'Kirby\'s Dream Land',
+					'Kirby\'s Dream Land 2',
+					'Wario Land - Super Mario Land 3',
+					'Final Fantasy Adventure',
+					'Mega Man - Dr. Wily\'s Revenge',
+					'Mega Man II',
+					'Mega Man III',
+					'Mega Man IV',
+					'Mega Man V',
+					'Gargoyle\'s Quest',
+					'Kid Icarus - Of Myths and Monsters',
+					'Castlevania - The Adventure',
+					'Castlevania II - Belmont\'s Revenge',
+					'Batman',
+					'Contra - The Alien Wars',
+					'Dr. Mario'
+				],
+				'GBC': [
+					'Legend of Zelda, The - Oracle of Ages',
+					'Legend of Zelda, The - Oracle of Seasons',
+					'Legend of Zelda, The - Link\'s Awakening DX',
+					'Pokemon Gold',
+					'Pokemon Silver',
+					'Pokemon Crystal',
+					'Metal Gear Solid',
+					'Wario Land 3',
+					'Wario Land II',
+					'Dragon Warrior III',
+					'Super Mario Bros. Deluxe',
+					'Mario Tennis',
+					'Mario Golf',
+					'Pokemon Trading Card Game',
+					'Pokemon Pinball',
+					'Donkey Kong Country',
+					'Shantae',
+					'Mega Man Xtreme',
+					'Mega Man Xtreme 2',
+					'R-Type DX',
+					'Bionic Commando - Elite Forces',
+					'Dragon Warrior Monsters',
+					'Dragon Warrior Monsters 2',
+					'Harvest Moon GBC',
+					'Kirby Tilt \'n\' Tumble'
+				],
+				'NES': [
+					'Super Mario Bros. 3',
+					'Legend of Zelda, The',
+					'Super Mario Bros.',
+					'Super Mario Bros. 2',
+					'Zelda II - The Adventure of Link',
+					'Mega Man 2',
+					'Mega Man 3',
+					'Metroid',
+					'Contra',
+					'Castlevania',
+					'Castlevania III - Dracula\'s Curse',
+					'Punch-Out!!',
+					'Final Fantasy',
+					'Dragon Warrior',
+					'Dragon Warrior III',
+					'Dragon Warrior IV',
+					'Kirby\'s Adventure',
+					'Ninja Gaiden',
+					'Ninja Gaiden II',
+					'Ninja Gaiden III',
+					'Tecmo Super Bowl',
+					'DuckTales',
+					'Mega Man',
+					'Bionic Commando',
+					'Battletoads'
+				],
+				'SNES': [
+					'Chrono Trigger',
+					'Legend of Zelda, The - A Link to the Past',
+					'Super Mario World',
+					'Super Metroid',
+					'Final Fantasy VI',
+					'Final Fantasy IV',
+					'EarthBound',
+					'Super Mario World 2 - Yoshi\'s Island',
+					'Secret of Mana',
+					'Super Mario RPG',
+					'Donkey Kong Country',
+					'Donkey Kong Country 2 - Diddy\'s Kong Quest',
+					'Donkey Kong Country 3',
+					'Mega Man X',
+					'Mega Man X2',
+					'Mega Man X3',
+					'Street Fighter II Turbo',
+					'Super Mario Kart',
+					'F-Zero',
+					'Star Fox',
+					'Contra III - The Alien Wars',
+					'Castlevania IV',
+					'Teenage Mutant Ninja Turtles IV - Turtles in Time',
+					'ActRaiser',
+					'Kirby Super Star'
+				],
+				'Genesis': [
+					'Sonic the Hedgehog 2',
+					'Sonic the Hedgehog',
+					'Sonic the Hedgehog 3',
+					'Sonic & Knuckles',
+					'Streets of Rage 2',
+					'Streets of Rage',
+					'Gunstar Heroes',
+					'Phantasy Star IV',
+					'Shining Force',
+					'Shining Force II',
+					'Castlevania - Bloodlines',
+					'Contra - Hard Corps',
+					'Earthworm Jim',
+					'Earthworm Jim 2',
+					'Shinobi III',
+					'Revenge of Shinobi',
+					'Golden Axe',
+					'Comix Zone',
+					'Vectorman',
+					'Vectorman 2',
+					'Thunder Force III',
+					'Thunder Force IV',
+					'Rocket Knight Adventures',
+					'Altered Beast',
+					'Toejam & Earl'
+				],
+				'Game Gear': [
+					'Sonic Triple Trouble',
+					'Sonic the Hedgehog',
+					'Sonic the Hedgehog 2',
+					'Shinobi',
+					'Shinobi II - The Silent Fury',
+					'Shining Force - Sword of Hajya',
+					'Defenders of Oasis',
+					'Gunstar Heroes',
+					'Streets of Rage 2',
+					'Castle of Illusion',
+					'Land of Illusion',
+					'Tails Adventure',
+					'Columns',
+					'Sonic Chaos',
+					'GG Aleste',
+					'Ax Battler',
+					'Dragon Crystal',
+					'Phantasy Star Adventure',
+					'Wonder Boy - The Dragon\'s Trap',
+					'Power Strike II',
+					'Vampire - Master of Darkness',
+					'Ninja Gaiden',
+					'Ristar',
+					'Mortal Kombat',
+					'NBA Jam'
+				],
+				'Master System': [
+					'Sonic the Hedgehog',
+					'Phantasy Star',
+					'Wonder Boy III - The Dragon\'s Trap',
+					'Wonder Boy in Monster Land',
+					'Alex Kidd in Miracle World',
+					'Alex Kidd in Shinobi World',
+					'Shinobi',
+					'Golden Axe Warrior',
+					'Ninja Gaiden',
+					'Castle of Illusion',
+					'Land of Illusion',
+					'R-Type',
+					'Power Strike',
+					'Power Strike II',
+					'Golvellius',
+					'Zillion',
+					'Spellcaster',
+					'Master of Darkness',
+					'Psycho Fox',
+					'Asterix',
+					'Lucky Dime Caper',
+					'Sonic the Hedgehog 2',
+					'Streets of Rage',
+					'Sonic Chaos',
+					'Columns'
+				],
+				'PS1': [
+					'Final Fantasy VII',
+					'Metal Gear Solid',
+					'Castlevania - Symphony of the Night',
+					'Resident Evil 2',
+					'Final Fantasy IX',
+					'Chrono Cross',
+					'Final Fantasy Tactics',
+					'Silent Hill',
+					'Tekken 3',
+					'Resident Evil',
+					'Gran Turismo 2',
+					'Crash Bandicoot - Warped',
+					'Crash Bandicoot 2 - Cortex Strikes Back',
+					'Spyro the Dragon',
+					'Spyro 2 - Ripto\'s Rage',
+					'Tony Hawk\'s Pro Skater 2',
+					'Twisted Metal 2',
+					'Vagrant Story',
+					'Parasite Eve',
+					'Legend of Dragoon',
+					'Suikoden II',
+					'Xenogears',
+					'Ape Escape',
+					'MediEvil',
+					'PaRappa the Rapper'
+				],
+				'N64': [
+					'Legend of Zelda, The - Ocarina of Time',
+					'Super Mario 64',
+					'GoldenEye 007',
+					'Legend of Zelda, The - Majora\'s Mask',
+					'Banjo-Kazooie',
+					'Perfect Dark',
+					'Super Smash Bros.',
+					'Mario Kart 64',
+					'Banjo-Tooie',
+					'Paper Mario',
+					'Star Fox 64',
+					'F-Zero X',
+					'Conker\'s Bad Fur Day',
+					'Diddy Kong Racing',
+					'Pokemon Stadium',
+					'Pokemon Stadium 2',
+					'Wave Race 64',
+					'1080 Snowboarding',
+					'Mario Party 2',
+					'Mario Party 3',
+					'Kirby 64 - The Crystal Shards',
+					'Ogre Battle 64',
+					'Sin and Punishment',
+					'Star Wars - Rogue Squadron',
+					'Blast Corps'
+				],
+				'PCE': [
+					'Castlevania - Rondo of Blood',
+					'Ys Book I & II',
+					'Bonk\'s Adventure',
+					'Bonk\'s Revenge',
+					'Blazing Lazers',
+					'R-Type',
+					'Gate of Thunder',
+					'Lords of Thunder',
+					'Soldier Blade',
+					'Super Star Soldier',
+					'Ninja Spirit',
+					'Splatterhouse',
+					'Military Madness',
+					'Dungeon Explorer',
+					'Devil\'s Crush',
+					'Alien Crush',
+					'Air Zonk',
+					'Bomberman \'94',
+					'Bomberman \'93',
+					'Neutopia',
+					'Neutopia II',
+					'Legendary Axe',
+					'Legendary Axe II',
+					'Cadash',
+					'Snatcher'
+				],
+				'Neo Geo': [
+					'Garou - Mark of the Wolves',
+					'Metal Slug 3',
+					'Metal Slug X',
+					'Metal Slug',
+					'King of Fighters \'98',
+					'King of Fighters \'97',
+					'Samurai Shodown II',
+					'Last Blade 2',
+					'Last Blade',
+					'Real Bout Fatal Fury 2',
+					'Fatal Fury Special',
+					'Art of Fighting 3',
+					'Shock Troopers',
+					'Shock Troopers - 2nd Squad',
+					'Blazing Star',
+					'Pulstar',
+					'Neo Turf Masters',
+					'Windjammers',
+					'Twinkle Star Sprites',
+					'Baseball Stars 2',
+					'Top Hunter',
+					'Magician Lord',
+					'Sengoku 3',
+					'Matrimelee',
+					'Kizuna Encounter'
+				],
+				'Atari Lynx': [
+					'California Games',
+					'Chip\'s Challenge',
+					'Todd\'s Adventures in Slime World',
+					'Blue Lightning',
+					'Robotron 2084',
+					'Xenophobe',
+					'RoadBlasters',
+					'Rampage',
+					'Klax',
+					'Lemmings',
+					'Checkered Flag',
+					'BattleWheels',
+					'Double Dragon',
+					'Ninja Gaiden',
+					'Shadow of the Beast',
+					'Rygar',
+					'Toki',
+					'Viking Child',
+					'Gates of Zendocon',
+					'Warbirds',
+					'Xybots',
+					'Gauntlet - The Third Encounter',
+					'Basketbrawl',
+					'Electrocop',
+					'Zarlor Mercenary'
+				],
+				'Atari 2600': [
+					'Pitfall!',
+					'Pitfall II - Lost Caverns',
+					'Adventure',
+					'Yars\' Revenge',
+					'River Raid',
+					'Missile Command',
+					'Space Invaders',
+					'Asteroids',
+					'Pac-Man',
+					'Ms. Pac-Man',
+					'Demon Attack',
+					'Frogger',
+					'Centipede',
+					'Defender',
+					'Berzerk',
+					'Combat',
+					'Kaboom!',
+					'Q*bert',
+					'Donkey Kong',
+					'Joust',
+					'Jungle Hunt',
+					'Dig Dug',
+					'Pole Position',
+					'Enduro',
+					'H.E.R.O.'
+				],
+				'WonderSwan': [
+					'Final Fantasy',
+					'Final Fantasy II',
+					'Judgement Silversword',
+					'Gunpey',
+					'Makaimura',
+					'Klonoa - Moonlight Museum',
+					'Mr. Driller',
+					'Tetris',
+					'Guilty Gear Petit 2',
+					'One Piece Grand Battle',
+					'Front Mission',
+					'Rhyme Rider Kerorican',
+					'Rainbow Islands',
+					'Golden Axe',
+					'Rockman & Forte',
+					'Dicing Knight Period',
+					'Digimon Adventure',
+					'Chocobo no Fushigi na Dungeon',
+					'Beatmania',
+					'Densha de Go! 2',
+					'Buffers Evolution',
+					'Crazy Climber',
+					'Makai Toushi SaGa',
+					'Romancing SaGa',
+					'SD Gundam G Generation'
+				],
+				'Neo Geo Pocket': [
+					'SNK vs. Capcom - Match of the Millennium',
+					'SNK vs. Capcom - Card Fighters Clash',
+					'Sonic the Hedgehog Pocket Adventure',
+					'Metal Slug - 2nd Mission',
+					'Metal Slug - 1st Mission',
+					'King of Fighters R-2',
+					'Last Blade',
+					'Gals\' Fighters',
+					'Samurai Shodown! 2',
+					'Fatal Fury - First Contact',
+					'Neo Turf Masters',
+					'Baseball Stars Color',
+					'Dark Arms - Beast Buster',
+					'Faselei!',
+					'Biomotor Unitron',
+					'Rockman Battle & Fighters',
+					'Bust-A-Move Pocket',
+					'Puyo Pop',
+					'Puzzle Link 2',
+					'Pac-Man',
+					'Cotton',
+					'Cool Cool Jam',
+					'Dive Alert',
+					'Evolution - Eternal Dungeons',
+					'Ogre Battle Gaiden'
+				]
 			};
 
 			// IndexedDB for persisting directory handle and device
@@ -1825,8 +2335,9 @@
 				window.scrollTo(0, 0);
 				// Small delay to let the spinner render before heavy work
 				await new Promise(r => setTimeout(r, 50));
-				// Update game count badge
+				// Update game count badge and Top 25 button visibility
 				updateGameCountBadge();
+				updateTop25Button();
 				await renderGames();
 			}
 
@@ -1843,8 +2354,9 @@
 				window.scrollTo(0, 0);
 				// Small delay to let the spinner render before heavy work
 				await new Promise(r => setTimeout(r, 50));
-				// Update game count badge
+				// Update game count badge and hide Top 25 button for All Games view
 				updateGameCountBadge();
+				updateTop25Button();
 				await renderGames();
 			}
 
@@ -1988,6 +2500,176 @@
 					: 'icon solid fa-sort-alpha-up';
 				document.getElementById('sortLabel').textContent = currentSort === 'az' ? 'A-Z' : 'Z-A';
 				renderGames();
+			}
+
+			// Top 25 Games Feature
+			function normalizeGameName(name) {
+				// Normalize a game name for comparison: lowercase, remove punctuation, region codes, etc.
+				return name
+					.toLowerCase()
+					.replace(/\([^)]*\)/g, '') // Remove (USA), (Europe), etc.
+					.replace(/\[[^\]]*\]/g, '') // Remove [!], [T+Eng], etc.
+					.replace(/[^a-z0-9]/g, '') // Remove non-alphanumeric
+					.trim();
+			}
+
+			function checkGameOwned(topGameName, ownedGames) {
+				const normalizedTop = normalizeGameName(topGameName);
+				return ownedGames.some(game => {
+					const normalizedOwned = normalizeGameName(game.baseName);
+					// Check if either contains the other (fuzzy match)
+					return normalizedOwned.includes(normalizedTop) ||
+					       normalizedTop.includes(normalizedOwned) ||
+					       // Also check for significant overlap
+					       (normalizedTop.length > 5 && normalizedOwned.length > 5 &&
+					        (normalizedTop.slice(0, 10) === normalizedOwned.slice(0, 10)));
+				});
+			}
+
+			function getConsoleKey(consoleName) {
+				// Map folder names to topGamesData keys
+				const mapping = {
+					// Nintendo Handhelds
+					'Game Boy': 'GB', 'GB': 'GB', 'gameboy': 'GB', 'Gameboy': 'GB',
+					'Game Boy Color': 'GBC', 'GBC': 'GBC', 'gameboycolor': 'GBC',
+					'Game Boy Advance': 'GBA', 'GBA': 'GBA', 'gameboyadvance': 'GBA',
+					// Nintendo Home
+					'NES': 'NES', 'FC': 'NES', 'Famicom': 'NES', 'famicom': 'NES',
+					'SNES': 'SNES', 'SFC': 'SNES', 'Super Famicom': 'SNES', 'superfamicom': 'SNES',
+					'N64': 'N64', 'Nintendo 64': 'N64', 'nintendo64': 'N64',
+					// Sega
+					'Genesis': 'Genesis', 'MD': 'Genesis', 'Sega Genesis': 'Genesis', 'Mega Drive': 'Genesis', 'megadrive': 'Genesis',
+					'Game Gear': 'Game Gear', 'GG': 'Game Gear', 'gamegear': 'Game Gear',
+					'Master System': 'Master System', 'MS': 'Master System', 'Sega Master System': 'Master System', 'SMS': 'Master System',
+					// Sony
+					'PS1': 'PS1', 'PSX': 'PS1', 'PlayStation': 'PS1', 'PS': 'PS1', 'playstation': 'PS1',
+					// NEC
+					'PCE': 'PCE', 'PC Engine': 'PCE', 'TurboGrafx-16': 'PCE', 'TurboGrafx': 'PCE', 'pcengine': 'PCE', 'turbografx': 'PCE',
+					// SNK
+					'Neo Geo': 'Neo Geo', 'NEOGEO': 'Neo Geo', 'neogeo': 'Neo Geo', 'NeoGeo': 'Neo Geo',
+					'Neo Geo Pocket': 'Neo Geo Pocket', 'NGP': 'Neo Geo Pocket', 'NGPC': 'Neo Geo Pocket', 'neogeopocket': 'Neo Geo Pocket',
+					// Atari
+					'Atari 2600': 'Atari 2600', 'atari2600': 'Atari 2600', 'ATARI': 'Atari 2600', 'Atari': 'Atari 2600',
+					'Atari Lynx': 'Atari Lynx', 'LYNX': 'Atari Lynx', 'Lynx': 'Atari Lynx', 'atarilynx': 'Atari Lynx',
+					// Bandai
+					'WonderSwan': 'WonderSwan', 'WS': 'WonderSwan', 'wonderswan': 'WonderSwan'
+				};
+				return mapping[consoleName] || consoleName;
+			}
+
+			function openTop25Modal() {
+				if (!currentConsole || currentConsole === '__all__') return;
+
+				const consoleKey = getConsoleKey(currentConsole);
+				const topGames = topGamesData[consoleKey];
+
+				if (!topGames) {
+					alert('Top 25 list not available for this console yet.');
+					return;
+				}
+
+				const ownedGames = consoles[currentConsole]?.games || [];
+				const list = document.getElementById('top25List');
+				let owned = 0, missing = 0;
+
+				document.getElementById('top25ConsoleName').textContent = currentConsole + ' Games';
+
+				const html = topGames.map((game, idx) => {
+					const isOwned = checkGameOwned(game, ownedGames);
+					if (isOwned) owned++; else missing++;
+					return `<div class="top25-item ${isOwned ? 'owned' : 'missing'}">
+						<span class="top25-rank">#${idx + 1}</span>
+						<span class="top25-icon ${isOwned ? 'owned' : 'missing'}">
+							<span class="icon solid fa-${isOwned ? 'check' : 'times'}"></span>
+						</span>
+						<span class="top25-name">${game}</span>
+					</div>`;
+				}).join('');
+
+				list.innerHTML = html;
+				document.getElementById('top25Owned').textContent = owned;
+				document.getElementById('top25Missing').textContent = missing;
+				document.getElementById('top25Modal').classList.add('active');
+
+				// Setup drag and drop
+				setupTop25DragDrop();
+			}
+
+			function setupTop25DragDrop() {
+				const dropZone = document.getElementById('top25DropZone');
+
+				dropZone.ondragover = (e) => {
+					e.preventDefault();
+					dropZone.classList.add('dragover');
+				};
+				dropZone.ondragleave = () => {
+					dropZone.classList.remove('dragover');
+				};
+				dropZone.ondrop = async (e) => {
+					e.preventDefault();
+					dropZone.classList.remove('dragover');
+					const files = Array.from(e.dataTransfer.files);
+					await uploadTop25Files(files);
+				};
+			}
+
+			async function handleTop25Upload(event) {
+				const files = Array.from(event.target.files);
+				await uploadTop25Files(files);
+				event.target.value = '';
+			}
+
+			async function uploadTop25Files(files) {
+				if (!files.length || !currentConsole || !consoles[currentConsole]) return;
+
+				const consoleData = consoles[currentConsole];
+				const romExts = ['.gb', '.gbc', '.gba', '.nes', '.sfc', '.smc', '.md', '.gen', '.gg', '.sms', '.bin', '.zip', '.7z'];
+
+				let uploaded = 0;
+				for (const file of files) {
+					const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+					if (!romExts.includes(ext)) continue;
+
+					try {
+						// Clean filename
+						let cleanName = file.name
+							.replace(/\([^)]*\)/g, '')
+							.replace(/\[[^\]]*\]/g, '')
+							.replace(/\s+/g, ' ')
+							.trim();
+						// Ensure extension
+						if (!cleanName.toLowerCase().endsWith(ext)) {
+							cleanName = cleanName.substring(0, cleanName.lastIndexOf('.')) + ext;
+						}
+
+						const fh = await consoleData.handle.getFileHandle(cleanName, { create: true });
+						const w = await fh.createWritable();
+						await w.write(file);
+						await w.close();
+						uploaded++;
+					} catch (e) {
+						console.error('Upload error:', e);
+					}
+				}
+
+				if (uploaded > 0) {
+					// Refresh the entire directory to pick up new files
+					await scanExistingDirectory();
+					// Refresh the modal
+					openTop25Modal();
+					// Refresh main grid
+					await renderGames();
+				}
+			}
+
+			function updateTop25Button() {
+				const btn = document.getElementById('top25Btn');
+				if (!currentConsole || currentConsole === '__all__') {
+					btn.style.display = 'none';
+					return;
+				}
+				const consoleKey = getConsoleKey(currentConsole);
+				btn.style.display = topGamesData[consoleKey] ? '' : 'none';
 			}
 
 			let gameConsole = null; // Track which console the current game belongs to
