@@ -17,7 +17,7 @@ Or download this repository for offline use.
 - **RG Nano** - Anbernic's tiny retro handheld
 - **Miyoo Mini / Mini+** - With Onion OS support
 - **Miyoo Flip** - With Onion OS support
-- **Trimui Brick** - With Mustard OS support (NEW in v1.3!)
+- **Trimui Brick** - With Mustard OS support
 
 ## Features
 
@@ -27,6 +27,15 @@ Or download this repository for offline use.
 - **Mustard OS Integration** - Full support for Mustard OS catalogue structure (`MUOS/info/catalogue/<System>/box/`)
 - **Auto-Resize** - Images automatically resized to optimal dimensions per device (240px for RG Nano, 250px for Miyoo, 354px for Trimui Brick)
 
+### GameFAQs Integration (NEW in v1.4!)
+- **Dual Search** - Box art searched from both TheGamesDB and GameFAQs simultaneously
+- **Game Info Display** - Rating, Difficulty, and Length shown in game modal
+- **Styled Tooltips** - Hover for detailed breakdowns (votes, verdicts, playtime)
+
+### Save Manager (NEW in v1.4!)
+- **RG Nano Save Management** - Backup, restore, and delete game saves
+- **Delete Confirmation** - Modal confirmation prevents accidental deletions
+
 ### Top 25 Must-Have Games
 - **Curated Lists** - Top 25 rated games for 16 different consoles
 - **Collection Tracker** - See which must-have games you own vs missing
@@ -34,7 +43,7 @@ Or download this repository for offline use.
 - **Supported Consoles**: GB, GBC, GBA, NES, SNES, N64, Genesis, Game Gear, Master System, PS1, PC Engine, Neo Geo, Neo Geo Pocket, Atari 2600, Atari Lynx, WonderSwan
 
 ### Box Art Management
-- **Image Search** - Search TheGamesDB for box art
+- **Dual Image Search** - Search TheGamesDB and GameFAQs for box art
 - **Upload Local Images** - Drag & drop or browse for local artwork
 - **URL Import** - Paste image URLs directly with automatic download
 - **Smart Processing** - Auto-resize, format conversion, and optimization
@@ -53,6 +62,11 @@ Or download this repository for offline use.
 - **Rename & Delete** - Manage your ROM files directly
 
 ### User Experience
+- **Press Start 2P Font** - Retro pixel font for game titles and console names
+- **Responsive Modal** - Game modal scales for smaller screens (1080p and below)
+- **Button Hover Effects** - Pop-up animation on all buttons
+- **Styled Tooltips** - Custom tooltips matching the theme
+- **Styled Scrollbars** - Scrollbars match the app theme
 - **Loading Indicators** - Visual feedback when loading large collections
 - **Ultrawide Support** - Responsive layout for any screen size
 - **Persistent Storage** - Remembers your folder selection between sessions
@@ -128,6 +142,21 @@ The app recognizes and displays icons for:
 
 ## Changelog
 
+### v1.4
+- **GameFAQs Integration** - Additional box art source searching in parallel with TheGamesDB
+- **Game Info Display** - Rating, Difficulty, and Length from GameFAQs shown in game modal
+- **Styled Tooltips** - Hover over Rating/Difficulty/Length for detailed breakdowns
+- **Save Manager** - Backup, restore, and delete saves for RG Nano
+- **Press Start 2P Font** - Retro pixel font for game titles, console names, and sidebar
+- **Responsive Modal** - Game modal scales for smaller screens (1080p and below)
+- **Button Hover Effects** - All buttons now have pop-up animation on hover
+- **Streamlined URL Input** - Google search icon inside input field
+- **Game Title Tooltip** - Hover over truncated titles to see full name
+- **Styled Scrollbars** - Top 25 list and other areas match theme
+- **Top 25 Layout Fix** - Rank numbers and icons no longer clip
+- **MustardOS Scanning Fix** - Fixed ROM folder scanning for Trimui Brick
+- **Delete Confirmation** - Added modal confirmation for deleting saves
+
 ### v1.3
 - **Trimui Brick support** - Added full Mustard OS integration
 - Mustard OS catalogue structure support (`MUOS/info/catalogue/<System>/box/`)
@@ -159,7 +188,7 @@ The app recognizes and displays icons for:
 ## Credits
 
 - UI based on [Hyperspace](https://html5up.net/hyperspace) by HTML5 UP
-- Box art from [TheGamesDB](https://thegamesdb.net/)
+- Box art from [TheGamesDB](https://thegamesdb.net/) and [GameFAQs](https://gamefaqs.gamespot.com/)
 - Console icons included in the `icons` folder
 - Top 25 game lists curated from community rankings
 
