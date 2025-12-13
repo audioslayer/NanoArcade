@@ -17,22 +17,31 @@
 		<link rel="apple-touch-icon" href="assets/images/icon-192.png">
 		<link rel="manifest" href="manifest.json">
 		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Cookie&family=Press+Start+2P&display=swap" rel="stylesheet">
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 		<style>
 			/* Custom styles for NanoArcade */
 			#sidebar nav ul li {
 				display: flex;
 				align-items: center;
-				gap: 10px;
+				gap: 8px;
 			}
 
 			#sidebar nav ul li a {
 				color: #fff !important;
+				font-family: 'Press Start 2P', cursive;
+				font-size: 0.4em;
+				line-height: 1.4;
 				text-shadow: 0 0 8px rgba(96, 165, 250, 0.6), 0 0 15px rgba(59, 130, 246, 0.4);
 				border: none !important;
 				background: none !important;
 				outline: none !important;
 				box-shadow: none !important;
+				display: flex;
+				align-items: center;
+				white-space: nowrap;
 			}
 
 			#sidebar nav ul li a::before,
@@ -41,23 +50,31 @@
 			}
 
 			#sidebar nav ul li img.console-icon {
-				width: 32px;
-				height: 32px;
+				width: 36px;
+				height: 36px;
 				object-fit: contain;
 				vertical-align: middle;
-				margin-right: 8px;
+				margin-right: 12px;
+				flex-shrink: 0;
 			}
 
 			#sidebar nav ul li .game-count {
-				margin-left: auto;
+				margin-left: 8px;
 				background: rgba(255,255,255,0.1);
-				padding: 2px 8px;
+				padding: 2px 6px;
 				border-radius: 10px;
-				font-size: 0.8em;
+				font-size: 1em;
+				flex-shrink: 0;
 			}
 
 			#sidebar nav ul li .warning {
 				color: #60a5fa;
+				flex-shrink: 0;
+			}
+
+			#sidebar nav ul li a .icon.fa-home {
+				margin-right: 10px;
+				font-size: 1.5em;
 			}
 
 			.games-grid {
@@ -182,15 +199,17 @@
 				opacity: 0.8;
 			}
 			.top25-rank {
-				width: 28px;
+				min-width: 36px;
 				font-weight: bold;
 				color: #f59e0b;
 				font-size: 0.85em;
+				flex-shrink: 0;
 			}
 			.top25-icon {
-				width: 24px;
+				min-width: 24px;
 				text-align: center;
 				margin-right: 0.5em;
+				flex-shrink: 0;
 			}
 			.top25-icon.owned { color: #22c55e; }
 			.top25-icon.missing { color: #ef4444; }
@@ -201,6 +220,22 @@
 			.top25-upload-zone.dragover {
 				border-color: #f59e0b;
 				background: rgba(245, 158, 11, 0.1);
+			}
+
+			/* Top 25 scrollbar */
+			#top25List::-webkit-scrollbar {
+				width: 8px;
+			}
+			#top25List::-webkit-scrollbar-track {
+				background: rgba(0,0,0,0.2);
+				border-radius: 4px;
+			}
+			#top25List::-webkit-scrollbar-thumb {
+				background: rgba(245, 158, 11, 0.5);
+				border-radius: 4px;
+			}
+			#top25List::-webkit-scrollbar-thumb:hover {
+				background: rgba(245, 158, 11, 0.7);
 			}
 
 			.stats-row {
@@ -237,7 +272,10 @@
 			}
 
 			/* ========== UIverse 3D Skew Button (btongheng) ========== */
-			.btn-3d {
+			.btn-3d,
+			.btn-3d:focus,
+			.btn-3d:hover,
+			.btn-3d:active {
 				--btn-color: #3b82f6;
 				--btn-shadow: #1d4ed8;
 				--btn-glow: #3b82f663;
@@ -253,12 +291,17 @@
 				text-transform: uppercase;
 				color: #fff;
 				background: var(--btn-color);
-				border: 2px solid var(--btn-shadow);
+				border: 2px solid var(--btn-shadow) !important;
 				border-radius: 0.75rem;
 				box-shadow: 0 6px 0 var(--btn-shadow);
 				transform: skew(-10deg);
 				transition: all 0.1s ease;
 				filter: drop-shadow(0 12px 16px var(--btn-glow));
+				outline: none !important;
+			}
+			.btn-3d:hover {
+				transform: skew(-10deg) translateY(-2px);
+				box-shadow: 0 8px 0 var(--btn-shadow);
 			}
 			.btn-3d:active {
 				letter-spacing: 0.5px;
@@ -301,6 +344,10 @@
 				padding: 8px 16px;
 				font-size: 0.7em;
 				box-shadow: 0 4px 0 var(--btn-shadow);
+			}
+			.btn-3d.small:hover {
+				transform: skew(-10deg) translateY(-2px);
+				box-shadow: 0 6px 0 var(--btn-shadow);
 			}
 			.btn-3d.small:active {
 				transform: skew(-10deg) translateY(4px);
@@ -346,6 +393,54 @@
 				min-width: 200px;
 			}
 
+			/* GameFAQs tooltip styles */
+			.gf-tooltip {
+				display: none;
+				position: absolute;
+				bottom: 100%;
+				left: 50%;
+				transform: translateX(-50%);
+				background: rgba(0,0,0,0.95);
+				border: 1px solid rgba(59, 130, 246, 0.4);
+				border-radius: 8px;
+				padding: 0.6em 0.8em;
+				font-size: 0.85em;
+				white-space: nowrap;
+				z-index: 100;
+				margin-bottom: 0.5em;
+				box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+			}
+			.gf-tooltip::after {
+				content: '';
+				position: absolute;
+				top: 100%;
+				left: 50%;
+				transform: translateX(-50%);
+				border: 6px solid transparent;
+				border-top-color: rgba(59, 130, 246, 0.4);
+			}
+			#gfRatingWrap:hover .gf-tooltip,
+			#gfDifficultyWrap:hover .gf-tooltip,
+			#gfLengthWrap:hover .gf-tooltip,
+			#gameTitleWrap:hover .gf-tooltip {
+				display: block;
+			}
+			#gameTitleTooltip::after {
+				top: -12px;
+				border-top-color: transparent;
+				border-bottom-color: rgba(59, 130, 246, 0.4);
+			}
+			.gf-tooltip-row {
+				display: flex;
+				justify-content: space-between;
+				gap: 1em;
+				padding: 0.15em 0;
+				color: rgba(255,255,255,0.8);
+			}
+			.gf-tooltip-row span:first-child {
+				color: rgba(255,255,255,0.5);
+			}
+
 			/* Modal styles */
 			.modal-overlay {
 				display: none;
@@ -375,14 +470,83 @@
 				position: relative;
 			}
 
+			/* Responsive modal - scale content to fit screen without scrolling */
+			@media (max-height: 950px) {
+				#gameModal .modal-box {
+					padding: 1.25em;
+				}
+				#modalImagePreview {
+					height: 240px !important;
+					margin-bottom: 0.75em !important;
+				}
+				#gameFaqsInfo {
+					padding: 0.5em !important;
+					margin-bottom: 0.5em !important;
+				}
+				#savesButtonRow, #noSavesButtonRow {
+					margin-bottom: 0.5em !important;
+				}
+				#gameModal .modal-box > div:last-of-type {
+					padding-top: 0.5em !important;
+				}
+			}
+
+			@media (max-height: 850px) {
+				#gameModal .modal-box {
+					padding: 1em;
+				}
+				#modalImagePreview {
+					height: 200px !important;
+					margin-bottom: 0.5em !important;
+				}
+				#gameFaqsInfo {
+					padding: 0.4em !important;
+					margin-bottom: 0.4em !important;
+					font-size: 0.75em !important;
+				}
+				#savesButtonRow, #noSavesButtonRow {
+					margin-bottom: 0.4em !important;
+				}
+				#savesButtonRow > button:first-child {
+					margin-bottom: 0.4em !important;
+				}
+			}
+
+			@media (max-height: 750px) {
+				#gameModal .modal-box {
+					padding: 0.75em;
+				}
+				#modalImagePreview {
+					height: 160px !important;
+					margin-bottom: 0.4em !important;
+				}
+				#gameFaqsInfo {
+					padding: 0.3em !important;
+					margin-bottom: 0.3em !important;
+				}
+			}
+
+			@media (max-height: 650px) {
+				#modalImagePreview {
+					height: 120px !important;
+				}
+			}
+
 			/* Smooth focus outlines */
 			select:focus,
 			input:focus,
-			button:focus,
 			textarea:focus {
 				outline: none;
 				border-color: #3b82f6;
 				box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+			}
+
+			button,
+			button:focus,
+			button:active,
+			button:hover {
+				outline: none !important;
+				-webkit-tap-highlight-color: transparent;
 			}
 
 			.modal-box .modal-header {
@@ -422,7 +586,6 @@
 				opacity: 1;
 				background: none !important;
 			}
-
 			/* Game modal specific */
 			.game-modal-content {
 				display: flex;
@@ -922,6 +1085,12 @@
 				object-fit: contain;
 			}
 
+			.console-header h2 {
+				font-family: 'Press Start 2P', cursive;
+				font-size: 0.9em;
+				text-shadow: 0 0 8px rgba(96, 165, 250, 0.6), 0 0 15px rgba(59, 130, 246, 0.4);
+			}
+
 			.game-count-badge {
 				background: rgba(59, 130, 246, 0.2);
 				color: #60a5fa;
@@ -1127,6 +1296,10 @@
 							<div class="label">Missing Art</div>
 						</div>
 					</div>
+					<!-- Buy Me a Coffee -->
+					<div style="margin-top: 2em;">
+						<a href="https://www.buymeacoffee.com/audioslayer" target="_blank" rel="noopener"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=audioslayer&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" alt="Buy me a coffee" /></a>
+					</div>
 				</div>
 			</section>
 
@@ -1166,8 +1339,11 @@
 			<div class="modal-box" style="max-width: 480px;">
 				<!-- Header -->
 				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em; gap: 0.5em;">
-					<div style="display: flex; align-items: center; gap: 0.5em; min-width: 0; flex: 1; overflow: hidden;">
-						<h3 id="modalGameName" style="color: #60a5fa; margin: 0; font-size: 1.1em; font-weight: 600; text-shadow: 0 0 20px rgba(96, 165, 250, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Game Name</h3>
+					<div style="display: flex; align-items: center; gap: 0.5em; min-width: 0; flex: 1;">
+						<div id="gameTitleWrap" style="position: relative; min-width: 0; flex: 1; cursor: default;">
+							<h3 id="modalGameName" style="color: #ffffff; margin: 0; font-family: 'Press Start 2P', cursive; font-size: 0.55em; text-shadow: 0 0 8px #3b82f6, 0 0 15px #3b82f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Game Name</h3>
+							<div id="gameTitleTooltip" class="gf-tooltip" style="bottom: auto; top: 100%; margin-top: 0.5em; margin-bottom: 0;"></div>
+						</div>
 						<span class="icon solid fa-pencil-alt" onclick="openRenameFromGameModal()" style="color: rgba(255,255,255,0.4); cursor: pointer; font-size: 0.8em; flex-shrink: 0;" title="Rename game"></span>
 					</div>
 					<button class="close-btn" style="flex-shrink: 0;" onclick="closeModal('gameModal')">&times;</button>
@@ -1186,6 +1362,32 @@
 				">
 					<span class="no-image">?</span>
 				</div>
+				<!-- GameFAQs Info -->
+				<div id="gameFaqsInfo" style="display: none; margin-bottom: 1em; padding: 0.75em; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2);">
+					<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5em; text-align: center; font-size: 0.8em;">
+						<div id="gfRatingWrap" style="cursor: help; position: relative;">
+							<div style="color: rgba(255,255,255,0.5); margin-bottom: 0.25em;">Rating</div>
+							<div id="gfRating" style="color: #fbbf24;">
+								<span class="icon solid fa-star"></span> --
+							</div>
+							<div id="gfRatingTooltip" class="gf-tooltip"></div>
+						</div>
+						<div id="gfDifficultyWrap" style="cursor: help; position: relative;">
+							<div style="color: rgba(255,255,255,0.5); margin-bottom: 0.25em;">Difficulty</div>
+							<div id="gfDifficulty" style="color: #f87171;">
+								<span class="icon solid fa-heartbeat"></span> --
+							</div>
+							<div id="gfDifficultyTooltip" class="gf-tooltip"></div>
+						</div>
+						<div id="gfLengthWrap" style="cursor: help; position: relative;">
+							<div style="color: rgba(255,255,255,0.5); margin-bottom: 0.25em;">Length</div>
+							<div id="gfLength" style="color: #34d399;">
+								<span class="icon solid fa-clock"></span> --
+							</div>
+							<div id="gfLengthTooltip" class="gf-tooltip"></div>
+						</div>
+					</div>
+				</div>
 				<!-- RG Nano layout: Find Art full width, then Saves + Local Image -->
 				<div id="savesButtonRow" style="display: none; margin-bottom: 0.75em;">
 					<button class="btn-3d small" onclick="openImagePicker()" style="width: 100%; margin-bottom: 0.75em;"><span class="icon solid fa-search"></span> Find Art</button>
@@ -1201,14 +1403,11 @@
 				</div>
 				<!-- URL input section -->
 				<div style="margin-bottom: 0.75em;">
-					<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35em;">
-						<label style="font-size: 0.8em; color: rgba(255,255,255,0.5); line-height: 1;">Image URL</label>
-						<a href="#" class="google-link" onclick="openGoogleImages(); return false;" style="font-size: 0.8em; color: #60a5fa; line-height: 1; text-decoration: none; border: none;">Search Google <span class="icon solid fa-external-link-alt" style="font-size: 0.7em;"></span></a>
-					</div>
 					<div style="display: flex; gap: 0.5em;">
 						<div style="flex: 1; position: relative; display: flex; align-items: center;">
 							<span class="icon solid fa-link" style="position: absolute; left: 0.75em; color: rgba(255,255,255,0.4); font-size: 0.85em;"></span>
-							<input type="url" id="imageUrl" class="url-input" placeholder="Paste link here..." style="border-color: rgba(59, 130, 246, 0.3); padding-left: 2.25em; width: 100%;">
+							<input type="url" id="imageUrl" class="url-input" placeholder="Paste link here..." style="border-color: rgba(59, 130, 246, 0.3); padding-left: 2.25em; padding-right: 2.5em; width: 100%; box-sizing: border-box;">
+							<span class="icon brands fa-google" onclick="openGoogleImages()" style="position: absolute; right: 0.75em; color: rgba(255,255,255,0.5); font-size: 0.95em; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='rgba(255,255,255,0.5)'" title="Search Google Images"></span>
 						</div>
 						<button class="btn-3d small green" onclick="downloadAndResizeImage()"><span class="icon solid fa-check"></span></button>
 					</div>
@@ -3735,12 +3934,16 @@
 				currentGame = gameName;
 				gameConsole = consoleName || currentConsole;
 				const baseName = gameName.substring(0, gameName.lastIndexOf('.'));
-				document.getElementById('modalGameName').textContent = baseName;
+				const modalTitle = document.getElementById('modalGameName');
+				modalTitle.textContent = baseName;
+				document.getElementById('gameTitleTooltip').textContent = baseName;
 				document.getElementById('imageUrl').value = '';
 				document.getElementById('imageStatus').className = 'status-msg';
 				document.getElementById('imageStatus').style.display = 'none';
 				loadGameImage(baseName);
 				updateNextGameButton();
+				// Fetch GameFAQs info (async, non-blocking)
+				fetchGameFAQsInfo(baseName, gameConsole);
 				// Show/hide saves button and local image rows based on device
 				const savesBtn = document.getElementById('savesButtonRow');
 				const noSavesRow = document.getElementById('noSavesButtonRow');
@@ -3827,16 +4030,21 @@
 				try {
 					const images = [];
 					const parser = new DOMParser();
+					const consoleName = gameConsole || currentConsole;
 
-					// Search both sources in parallel
-					const [gamesDbResults, coverProjectResults] = await Promise.allSettled([
+					// Search all sources in parallel
+					const [gamesDbResults, gameFaqsResults, coverProjectResults] = await Promise.allSettled([
 						searchTheGamesDB(q, parser),
+						searchGameFAQs(q, parser, consoleName),
 						searchTheCoverProject(q, parser)
 					]);
 
-					// Combine results from both sources
+					// Combine results from all sources
 					if (gamesDbResults.status === 'fulfilled') {
 						images.push(...gamesDbResults.value);
+					}
+					if (gameFaqsResults.status === 'fulfilled') {
+						images.push(...gameFaqsResults.value);
 					}
 					if (coverProjectResults.status === 'fulfilled') {
 						images.push(...coverProjectResults.value);
@@ -3917,6 +4125,282 @@
 				// The Cover Project's CDN blocks CORS proxies, so we can't reliably fetch their images
 				// Return empty array - TheGamesDB will be the primary source
 				return [];
+			}
+
+			// GameFAQs platform code mapping
+			const gameFaqsPlatformMap = {
+				// Nintendo Handhelds
+				'GB': 'gameboy', 'GBC': 'gbc', 'GBA': 'gba', 'NDS': 'ds', 'DS': 'ds',
+				// Nintendo Home
+				'NES': 'nes', 'FC': 'nes', 'SNES': 'snes', 'SFC': 'snes', 'N64': 'n64', 'Virtual Boy': 'virtualboy',
+				// Sega
+				'Genesis': 'genesis', 'MD': 'genesis', 'Game Gear': 'gamegear', 'GG': 'gamegear',
+				'Master System': 'sms', 'SMS': 'sms', 'MS': 'sms',
+				'Sega CD': 'segacd', 'Sega 32X': 'sega32x', '32X': 'sega32x',
+				'Saturn': 'saturn', 'Dreamcast': 'dreamcast', 'DC': 'dreamcast',
+				// Sony
+				'PS1': 'ps', 'PSX': 'ps', 'PlayStation': 'ps', 'PSP': 'psp',
+				// NEC
+				'PCE': 'tg16', 'PC Engine': 'tg16', 'TurboGrafx-16': 'tg16', 'TurboGrafx': 'tg16',
+				// SNK
+				'Neo Geo': 'neo', 'NEOGEO': 'neo', 'Neo Geo Pocket': 'ngpc', 'NGP': 'ngpc', 'NGPC': 'ngpc',
+				// Atari
+				'Atari 2600': 'atari2600', 'Atari 5200': 'atari5200', 'Atari 7800': 'atari7800', 'Atari Lynx': 'lynx',
+				// Bandai
+				'WonderSwan': 'wonderswan', 'WS': 'wonderswan',
+				// Other
+				'Coleco': 'colecovision', 'ColecoVision': 'colecovision',
+				'Intellivision': 'intellivision', '3DO': '3do',
+				// Arcade
+				'Arcade': 'arcade', 'MAME': 'arcade', 'CPS1': 'arcade', 'CPS2': 'arcade', 'CPS3': 'arcade'
+			};
+
+			async function searchGameFAQs(q, parser, consoleName) {
+				const images = [];
+
+				// Get platform code for GameFAQs
+				const consoleKey = getConsoleKey(consoleName);
+				const platformCode = gameFaqsPlatformMap[consoleKey];
+
+				// Related platforms (GB and GBC games are often interchangeable)
+				const relatedPlatforms = {
+					'gameboy': ['gameboy', 'gbc'],
+					'gbc': ['gbc', 'gameboy'],
+					'nes': ['nes'],
+					'snes': ['snes'],
+					'gba': ['gba'],
+					'genesis': ['genesis'],
+					'n64': ['n64'],
+					'ps': ['ps'],
+					'ds': ['ds']
+				};
+				const allowedPlatforms = platformCode ? (relatedPlatforms[platformCode] || [platformCode]) : null;
+
+				try {
+					// Use GameFAQs JSON search API
+					const searchUrl = `https://gamefaqs.gamespot.com/ajax/home_game_search?term=${encodeURIComponent(q)}`;
+					const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(searchUrl)}`);
+					if (!response.ok) return images;
+
+					const data = await response.json();
+					if (!Array.isArray(data)) return images;
+
+					// Filter results by platform and collect game URLs
+					// Prioritize games whose name closely matches the search query
+					const gameMatches = [];
+					const searchLower = q.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+					for (const game of data) {
+						if (!game.url || !game.platform_url) continue;
+
+						// Check if platform matches
+						const platformMatch = allowedPlatforms ? allowedPlatforms.includes(game.platform_url) : true;
+						if (!platformMatch) continue;
+
+						// Score by name similarity - exact match gets highest priority
+						const gameName = (game.game_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+						let score = 0;
+						if (gameName === searchLower) score = 100; // Exact match
+						else if (gameName.includes(searchLower)) score = 50; // Contains search
+						else if (searchLower.includes(gameName)) score = 25; // Search contains game name
+
+						// Boost exact platform match
+						if (game.platform_url === platformCode) score += 10;
+
+						gameMatches.push({ url: game.url, name: game.game_name, score });
+					}
+
+					// Sort by score descending
+					gameMatches.sort((a, b) => b.score - a.score);
+					const gameUrls = gameMatches.map(g => g.url);
+
+					// Helper to convert relative URLs to absolute
+					const toAbsoluteUrl = (src) => {
+						if (src.startsWith('//')) return 'https:' + src;
+						if (src.startsWith('/')) return 'https://gamefaqs.gamespot.com' + src;
+						if (!src.startsWith('http')) return 'https://gamefaqs.gamespot.com/' + src;
+						return src;
+					};
+
+					// Fetch box art from /boxes page for the best match
+					const uniqueUrls = [...new Set(gameUrls)].slice(0, 1);
+					for (const gameUrl of uniqueUrls) {
+						try {
+							// Go directly to the /boxes page for box art
+							const boxesPageUrl = `https://gamefaqs.gamespot.com${gameUrl}/boxes`;
+							const boxesResponse = await fetch(`https://corsproxy.io/?${encodeURIComponent(boxesPageUrl)}`);
+							if (!boxesResponse.ok) continue;
+
+							const boxesHtml = await boxesResponse.text();
+							const boxesDoc = parser.parseFromString(boxesHtml, 'text/html');
+
+							// Find all box art images
+							boxesDoc.querySelectorAll('img[src*="/a/box/"]').forEach(img => {
+								const src = img.getAttribute('src');
+								if (src) {
+									const thumbUrl = toAbsoluteUrl(src);
+									const imgFullUrl = thumbUrl.replace('_thumb.jpg', '_front.jpg');
+									if (!images.find(i => i.full === imgFullUrl)) {
+										images.push({ thumb: thumbUrl, full: imgFullUrl });
+									}
+								}
+							});
+						} catch (e) { /* Ignore errors */ }
+
+						if (images.length >= 10) break;
+					}
+				} catch (e) {
+					console.log('GameFAQs search error:', e);
+				}
+
+				return images;
+			}
+
+			// Fetch game info (rating, difficulty, length) from GameFAQs
+			async function fetchGameFAQsInfo(gameName, consoleName) {
+				const infoDiv = document.getElementById('gameFaqsInfo');
+				const ratingEl = document.getElementById('gfRating');
+				const difficultyEl = document.getElementById('gfDifficulty');
+				const lengthEl = document.getElementById('gfLength');
+				const ratingTooltip = document.getElementById('gfRatingTooltip');
+				const difficultyTooltip = document.getElementById('gfDifficultyTooltip');
+				const lengthTooltip = document.getElementById('gfLengthTooltip');
+
+				// Reset and hide while loading
+				infoDiv.style.display = 'none';
+				ratingEl.innerHTML = '<span class="icon solid fa-star"></span> --';
+				difficultyEl.innerHTML = '<span class="icon solid fa-heartbeat"></span> --';
+				lengthEl.innerHTML = '<span class="icon solid fa-clock"></span> --';
+				ratingTooltip.innerHTML = '';
+				difficultyTooltip.innerHTML = '';
+				lengthTooltip.innerHTML = '';
+
+				try {
+					// Get platform code
+					const consoleKey = getConsoleKey(consoleName);
+					const platformCode = gameFaqsPlatformMap[consoleKey];
+					const relatedPlatforms = {
+						'gameboy': ['gameboy', 'gbc'],
+						'gbc': ['gbc', 'gameboy'],
+						'nes': ['nes'],
+						'snes': ['snes'],
+						'gba': ['gba'],
+						'genesis': ['genesis'],
+						'n64': ['n64'],
+						'ps': ['ps'],
+						'ds': ['ds']
+					};
+					const allowedPlatforms = platformCode ? (relatedPlatforms[platformCode] || [platformCode]) : null;
+
+					// Search for the game
+					const searchUrl = `https://gamefaqs.gamespot.com/ajax/home_game_search?term=${encodeURIComponent(gameName)}`;
+					const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(searchUrl)}`);
+					if (!response.ok) return;
+
+					const data = await response.json();
+					if (!Array.isArray(data)) return;
+
+					// Find best matching game
+					const searchLower = gameName.toLowerCase().replace(/[^a-z0-9]/g, '');
+					let bestMatch = null;
+					let bestScore = 0;
+
+					for (const game of data) {
+						if (!game.url || !game.platform_url) continue;
+						const platformMatch = allowedPlatforms ? allowedPlatforms.includes(game.platform_url) : true;
+						if (!platformMatch) continue;
+
+						const gameNameLower = (game.game_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+						let score = 0;
+						if (gameNameLower === searchLower) score = 100;
+						else if (gameNameLower.includes(searchLower)) score = 50;
+						else if (searchLower.includes(gameNameLower)) score = 25;
+						if (game.platform_url === platformCode) score += 10;
+
+						if (score > bestScore) {
+							bestScore = score;
+							bestMatch = game;
+						}
+					}
+
+					if (!bestMatch) return;
+
+					// Fetch the game page
+					const gamePageUrl = `https://gamefaqs.gamespot.com${bestMatch.url}`;
+					const gameResponse = await fetch(`https://corsproxy.io/?${encodeURIComponent(gamePageUrl)}`);
+					if (!gameResponse.ok) return;
+
+					const html = await gameResponse.text();
+
+					// Parse rating with count
+					let rating = null;
+					let ratingCount = null;
+					let ratingLabel = null;
+					// Try "4.23 stars from 3375" pattern
+					let ratingMatch = html.match(/(\d+\.\d+)\s*stars?\s*from\s*(\d+)/i);
+					if (ratingMatch) {
+						rating = parseFloat(ratingMatch[1]).toFixed(2);
+						ratingCount = ratingMatch[2];
+					}
+					// Try text rating like "Great (3375 ratings)"
+					const labelMatch = html.match(/(Outstanding|Great|Good|Average|Bad|Terrible)\s*\((\d+)\s*ratings?\)/i);
+					if (labelMatch) {
+						ratingLabel = labelMatch[1];
+						if (!ratingCount) ratingCount = labelMatch[2];
+					}
+
+					// Parse difficulty with count
+					let difficulty = null;
+					let difficultyCount = null;
+					const diffMatch = html.match(/(Very Easy|Easy|Just Right|Tough|Very Hard|Unforgiving)\s*\((\d+)\)/i);
+					if (diffMatch) {
+						difficulty = diffMatch[1];
+						difficultyCount = diffMatch[2];
+					}
+
+					// Parse length with count
+					let length = null;
+					let lengthCount = null;
+					const lengthMatch = html.match(/(\d+(?:\.\d+)?)\s*Hours?\s*\((\d+)\)/i);
+					if (lengthMatch) {
+						length = lengthMatch[1] + 'h';
+						lengthCount = lengthMatch[2];
+					}
+
+					// Update UI if we found any data
+					if (rating || ratingLabel || difficulty || length) {
+						infoDiv.style.display = 'block';
+
+						// Rating
+						if (rating || ratingLabel) {
+							const displayRating = rating || ratingLabel;
+							ratingEl.innerHTML = `<span class="icon solid fa-star"></span> ${displayRating}`;
+							let tooltipHtml = '';
+							if (rating) tooltipHtml += `<div class="gf-tooltip-row"><span>Score:</span><span>${rating} / 5</span></div>`;
+							if (ratingLabel) tooltipHtml += `<div class="gf-tooltip-row"><span>Verdict:</span><span>${ratingLabel}</span></div>`;
+							if (ratingCount) tooltipHtml += `<div class="gf-tooltip-row"><span>Votes:</span><span>${parseInt(ratingCount).toLocaleString()}</span></div>`;
+							ratingTooltip.innerHTML = tooltipHtml;
+						}
+
+						// Difficulty
+						if (difficulty) {
+							difficultyEl.innerHTML = `<span class="icon solid fa-heartbeat"></span> ${difficulty}`;
+							let tooltipHtml = `<div class="gf-tooltip-row"><span>Difficulty:</span><span>${difficulty}</span></div>`;
+							if (difficultyCount) tooltipHtml += `<div class="gf-tooltip-row"><span>Votes:</span><span>${parseInt(difficultyCount).toLocaleString()}</span></div>`;
+							difficultyTooltip.innerHTML = tooltipHtml;
+						}
+
+						// Length
+						if (length) {
+							lengthEl.innerHTML = `<span class="icon solid fa-clock"></span> ${length}`;
+							let tooltipHtml = `<div class="gf-tooltip-row"><span>Main Story:</span><span>${length}</span></div>`;
+							if (lengthCount) tooltipHtml += `<div class="gf-tooltip-row"><span>Votes:</span><span>${parseInt(lengthCount).toLocaleString()}</span></div>`;
+							lengthTooltip.innerHTML = tooltipHtml;
+						}
+					}
+				} catch (e) {
+					// Silently fail - info is optional
+				}
 			}
 
 			function selectPickerImage(img) {
@@ -4179,7 +4663,9 @@
 						// Update the game modal with new name
 						if (currentGame === oldFileName) {
 							currentGame = newFileName;
-							document.getElementById('modalGameName').textContent = newName;
+							const modalTitle = document.getElementById('modalGameName');
+							modalTitle.textContent = newName;
+							document.getElementById('gameTitleTooltip').textContent = newName;
 							loadGameImage(newName);
 						}
 
@@ -4490,7 +4976,7 @@
 					// Navigate to FunKey/.picoarch/data/[emulator]/
 					const funKeyHandle = await directoryHandle.getDirectoryHandle('FunKey', { create: false }).catch(() => null);
 					if (!funKeyHandle) {
-						list.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6); padding: 2em;">No saves found. FunKey folder not detected.</p>';
+						list.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6); padding: 2em;">No saves found.</p>';
 						return;
 					}
 
