@@ -1,0 +1,27 @@
+{
+  "name": "NanoArcade Manager",
+  "short_name": "NanoArcade",
+  "description": "Box art manager for retro gaming handhelds - RG Nano, Miyoo Mini, Trimui Brick and more",
+  "start_url": "/NanoArcade/",
+  "scope": "/NanoArcade/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#6c5ce7",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "utilities"],
+  "lang": "en-US"
+}

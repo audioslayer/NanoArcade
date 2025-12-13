@@ -8,7 +8,14 @@
 		<title>NanoArcade</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="description" content="Box art manager for retro gaming handhelds - RG Nano, Miyoo Mini, Trimui Brick and more">
+		<meta name="theme-color" content="#6c5ce7">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta name="apple-mobile-web-app-title" content="NanoArcade">
 		<link rel="icon" type="image/png" href="assets/images/logo.png">
+		<link rel="apple-touch-icon" href="assets/images/icon-192.png">
+		<link rel="manifest" href="manifest.json">
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 		<style>
@@ -4008,6 +4015,15 @@
 						}
 					}, 1000);
 				} catch (e) { status.className = 'status-msg error'; status.textContent = 'Error: ' + e.message; }
+			}
+
+			// Register Service Worker for PWA
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					navigator.serviceWorker.register('sw.js')
+						.then(reg => console.log('NanoArcade: Service Worker registered', reg.scope))
+						.catch(err => console.log('NanoArcade: Service Worker registration failed', err));
+				});
 			}
 		</script>
 
