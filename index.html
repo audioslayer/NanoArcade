@@ -13,7 +13,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		<meta name="apple-mobile-web-app-title" content="NanoArcade">
-		<link rel="icon" type="image/png" href="assets/images/logo.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon.png">
 		<link rel="apple-touch-icon" href="assets/images/icon-192.png">
 		<link rel="manifest" href="manifest.json">
 		<link rel="stylesheet" href="assets/css/main.css" />
@@ -1090,7 +1090,7 @@
 						<li><a href="#intro">Home</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: #fff; font-style: italic; text-shadow: 0 0 8px rgba(96, 165, 250, 0.6), 0 0 15px rgba(59, 130, 246, 0.4);">Version 1.3</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: #fff; font-style: italic; text-shadow: 0 0 8px rgba(96, 165, 250, 0.6), 0 0 15px rgba(59, 130, 246, 0.4);">Version 1.4</div>
 			</div>
 		</section>
 
@@ -1165,12 +1165,12 @@
 		<div class="modal-overlay" id="gameModal">
 			<div class="modal-box" style="max-width: 480px;">
 				<!-- Header -->
-				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em;">
-					<div style="display: flex; align-items: center; gap: 0.5em; flex: 1; min-width: 0;">
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em; gap: 0.5em;">
+					<div style="display: flex; align-items: center; gap: 0.5em; min-width: 0; flex: 1; overflow: hidden;">
 						<h3 id="modalGameName" style="color: #60a5fa; margin: 0; font-size: 1.1em; font-weight: 600; text-shadow: 0 0 20px rgba(96, 165, 250, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Game Name</h3>
 						<span class="icon solid fa-pencil-alt" onclick="openRenameFromGameModal()" style="color: rgba(255,255,255,0.4); cursor: pointer; font-size: 0.8em; flex-shrink: 0;" title="Rename game"></span>
 					</div>
-					<button class="close-btn" onclick="closeModal('gameModal')">&times;</button>
+					<button class="close-btn" style="flex-shrink: 0;" onclick="closeModal('gameModal')">&times;</button>
 				</div>
 				<!-- Image preview -->
 				<div class="image-preview" id="modalImagePreview" style="
@@ -1186,8 +1186,16 @@
 				">
 					<span class="no-image">?</span>
 				</div>
-				<!-- Action buttons -->
-				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5em; margin-bottom: 0.75em;">
+				<!-- RG Nano layout: Find Art full width, then Saves + Local Image -->
+				<div id="savesButtonRow" style="display: none; margin-bottom: 0.75em;">
+					<button class="btn-3d small" onclick="openImagePicker()" style="width: 100%; margin-bottom: 0.75em;"><span class="icon solid fa-search"></span> Find Art</button>
+					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5em;">
+						<button class="btn-3d small cyan" onclick="openSaveManager()"><span class="icon solid fa-save"></span> Manage Saves</button>
+						<button class="btn-3d small gray" onclick="selectLocalImage()"><span class="icon solid fa-folder-open"></span> Local Image</button>
+					</div>
+				</div>
+				<!-- Non-RG Nano layout: Find Art + Local Image side by side -->
+				<div id="noSavesButtonRow" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5em; margin-bottom: 0.75em;">
 					<button class="btn-3d small" onclick="openImagePicker()"><span class="icon solid fa-search"></span> Find Art</button>
 					<button class="btn-3d small gray" onclick="selectLocalImage()"><span class="icon solid fa-folder-open"></span> Local Image</button>
 				</div>
@@ -1298,6 +1306,21 @@
 			</div>
 		</div>
 
+		<!-- Delete Save Confirmation Modal -->
+		<div class="modal-overlay" id="deleteSaveModal" style="z-index: 10001;">
+			<div class="modal-box" style="max-width: 400px;">
+				<div class="modal-header">
+					<h3 style="color: #ef4444;"><span class="icon solid fa-exclamation-triangle"></span> Delete Save</h3>
+					<button class="close-btn" onclick="closeModal('deleteSaveModal')">&times;</button>
+				</div>
+				<p id="deleteSaveConfirmText" style="margin-bottom: 1.5em; text-align: center;">Are you sure you want to delete this save?</p>
+				<div style="display: flex; gap: 1em; justify-content: center;">
+					<button class="btn-3d small gray" onclick="closeModal('deleteSaveModal')"><span class="icon solid fa-times"></span> Cancel</button>
+					<button class="btn-3d small red" onclick="executeDeleteSave()"><span class="icon solid fa-trash"></span> Delete</button>
+				</div>
+			</div>
+		</div>
+
 		<!-- Image Picker Modal (fullscreen) -->
 		<div class="image-picker-overlay" id="imagePicker">
 			<div class="image-picker-header">
@@ -1343,9 +1366,12 @@
 					<h3><span class="icon solid fa-i-cursor"></span> Rename Game</h3>
 					<button class="close-btn" onclick="closeModal('renameModal')">&times;</button>
 				</div>
-				<div class="compact-field" style="margin-bottom: 1em;">
+				<div class="compact-field" style="margin-bottom: 0.75em;">
 					<label>New name (without extension):</label>
 					<input type="text" id="renameInput" placeholder="Enter new name...">
+				</div>
+				<div style="margin-bottom: 1em;">
+					<button class="btn-3d small cyan" onclick="autoCleanName()" style="width: 100%;"><span class="icon solid fa-magic"></span> Auto-Clean Name</button>
 				</div>
 				<p style="font-size: 0.8em; color: rgba(255,255,255,0.5); margin-bottom: 1em;">This will rename both the ROM file and its box art image.</p>
 				<div style="display: flex; gap: 1em; justify-content: flex-end;">
@@ -1425,10 +1451,36 @@
 			</div>
 		</div>
 
+		<!-- Save Manager Modal -->
+		<div class="modal-overlay" id="saveModal">
+			<div class="modal-box" style="max-width: 600px;">
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em;">
+					<h3 style="color: #22d3ee; font-size: 1.1em; margin: 0; text-shadow: 0 0 20px rgba(34, 211, 238, 0.5);">
+						<span class="icon solid fa-save" style="margin-right: 0.5em;"></span>Save Manager - <span id="saveGameName">Game</span>
+					</h3>
+					<button class="close-btn" onclick="closeModal('saveModal')">&times;</button>
+				</div>
+
+				<!-- Local Saves -->
+				<div id="localSavesList" style="max-height: 300px; overflow-y: auto;">
+					<div class="loading-container" style="padding: 2em;">
+						<div class="spinner"></div>
+						<div class="loading-text">Checking for saves...</div>
+					</div>
+				</div>
+				<div style="margin-top: 1em; padding-top: 1em; border-top: 1px solid rgba(34, 211, 238, 0.2);">
+					<button class="btn-3d small green" onclick="uploadLocalSave()" style="width: 100%;">
+						<span class="icon solid fa-upload"></span> Restore Save File
+					</button>
+					<input type="file" id="saveFileInput" accept=".sav,.srm" style="display:none;" onchange="handleSaveUpload(event)">
+				</div>
+			</div>
+		</div>
+
 		<!-- Footer -->
 		<footer id="footer" class="wrapper style1-alt">
 			<div class="inner">
-				<span class="version-number">v1.3</span>
+				<span class="version-number">v1.4</span>
 			</div>
 		</footer>
 
@@ -2667,34 +2719,107 @@
 				const usesCatalogueStructure = profile.catalogueStructure === true; // Trimui Brick / Mustard OS
 
 				if (usesCatalogueStructure) {
-					// Mustard OS: Scan MUOS/info/catalogue/<system>/ structure
+					// MustardOS: ROMs in ROMS/<folder>/, box art in MUOS/info/catalogue/<system>/box/
+					// Mapping from common ROM folder names to MustardOS catalogue system names
+					const muosCatalogueMap = {
+						'gba': 'Nintendo Game Boy Advance',
+						'gb': 'Nintendo Game Boy',
+						'gbc': 'Nintendo Game Boy',
+						'nds': 'Nintendo DS',
+						'ds': 'Nintendo DS',
+						'nes': 'Nintendo NES - Famicom',
+						'fc': 'Nintendo NES - Famicom',
+						'famicom': 'Nintendo NES - Famicom',
+						'snes': 'Nintendo SNES - SFC',
+						'sfc': 'Nintendo SNES - SFC',
+						'md': 'Sega Mega Drive - Genesis',
+						'genesis': 'Sega Mega Drive - Genesis',
+						'megadrive': 'Sega Mega Drive - Genesis',
+						'ps': 'Sony PlayStation',
+						'ps1': 'Sony PlayStation',
+						'psx': 'Sony PlayStation',
+						'playstation': 'Sony PlayStation',
+						'pico': 'Sega Pico',
+						'n64': 'Nintendo N64',
+						'arcade': 'Arcade',
+						'cps1': 'Arcade',
+						'cps2': 'Arcade',
+						'cps3': 'Arcade',
+						'neogeo': 'SNK Neo Geo',
+						'pce': 'NEC PC Engine - TurboGrafx 16',
+						'pcengine': 'NEC PC Engine - TurboGrafx 16',
+						'gg': 'Sega Game Gear',
+						'gamegear': 'Sega Game Gear',
+						'sms': 'Sega Master System',
+						'mastersystem': 'Sega Master System',
+						'scummvm': 'ScummVM',
+						'fds': 'Nintendo Famicom Disk System',
+						'vb': 'Nintendo Virtual Boy',
+						'virtualboy': 'Nintendo Virtual Boy',
+						'pokemini': 'Nintendo Pokemon Mini',
+						'wswan': 'Bandai WonderSwan',
+						'wswanc': 'Bandai WonderSwan Color',
+						'ngp': 'SNK Neo Geo Pocket',
+						'ngpc': 'SNK Neo Geo Pocket Color',
+						'atari2600': 'Atari 2600',
+						'atari7800': 'Atari 7800',
+						'lynx': 'Atari Lynx',
+						'coleco': 'ColecoVision',
+						'msx': 'Microsoft MSX',
+						'vectrex': 'GCE Vectrex'
+					};
+
 					try {
-						const muosDir = await directoryHandle.getDirectoryHandle('MUOS');
-						const infoDir = await muosDir.getDirectoryHandle('info');
-						const catalogueDir = await infoDir.getDirectoryHandle('catalogue');
+						// Get ROMS folder
+						let romsDir;
+						try {
+							romsDir = await directoryHandle.getDirectoryHandle('ROMS');
+						} catch {
+							// Try lowercase
+							romsDir = await directoryHandle.getDirectoryHandle('roms');
+						}
 
-						// Iterate through system folders
-						for await (const systemEntry of catalogueDir.values()) {
-							if (systemEntry.kind === 'directory') {
-								const systemName = systemEntry.name;
+						// Get catalogue directory for box art
+						let catalogueDir = null;
+						try {
+							const muosDir = await directoryHandle.getDirectoryHandle('MUOS');
+							const infoDir = await muosDir.getDirectoryHandle('info');
+							catalogueDir = await infoDir.getDirectoryHandle('catalogue');
+						} catch {
+							// Catalogue not found, will work without box art
+						}
+
+						// Scan ROMS folder for system subfolders
+						for await (const romFolderEntry of romsDir.values()) {
+							if (romFolderEntry.kind === 'directory') {
+								const folderName = romFolderEntry.name;
 								const games = [];
-								try {
-									const systemDir = await catalogueDir.getDirectoryHandle(systemName);
 
-									// Get or create box art directory
+								try {
+									const romFolder = await romsDir.getDirectoryHandle(folderName);
+
+									// Find matching catalogue system for box art
+									const catalogueName = muosCatalogueMap[folderName.toLowerCase()] || folderName;
 									let boxDir = null;
-									try {
-										boxDir = await systemDir.getDirectoryHandle('box');
-									} catch {
-										// Box folder doesn't exist yet, will be created on save
+									if (catalogueDir) {
+										try {
+											const catalogueSystemDir = await catalogueDir.getDirectoryHandle(catalogueName);
+											boxDir = await catalogueSystemDir.getDirectoryHandle('box');
+										} catch {
+											// Try exact folder name as fallback
+											try {
+												const catalogueSystemDir = await catalogueDir.getDirectoryHandle(folderName);
+												boxDir = await catalogueSystemDir.getDirectoryHandle('box');
+											} catch {}
+										}
 									}
 
-									// Scan system directory for ROM files
-									for await (const file of systemDir.values()) {
+									// Scan for ROM files
+									for await (const file of romFolder.values()) {
 										if (file.kind === 'file') {
 											if (!file.name.includes('.')) continue;
 											const ext = '.' + file.name.split('.').pop().toLowerCase();
-											const skipExts = ['.png', '.jpg', '.jpeg', '.txt', '.cue', '.m3u', '.srm', '.sav', '.xml', '.json', '.db'];
+											const skipExts = ['.png', '.jpg', '.jpeg', '.txt', '.cue', '.m3u', '.srm', '.sav', '.xml', '.json', '.db', '.cfg'];
 											const skipNames = ['gamelist', 'miyoogamelist'];
 											const lowerName = file.name.toLowerCase();
 											const isSkipName = skipNames.some(s => lowerName.startsWith(s));
@@ -2724,25 +2849,37 @@
 									}
 
 									if (games.length > 0) {
-										consoles[systemName] = {
-											handle: systemDir,
+										// Use a display name based on catalogue or folder name
+										const displayName = catalogueName !== folderName ? catalogueName : folderName;
+										consoles[displayName] = {
+											handle: romFolder,
 											boxHandle: boxDir,
-											systemName: systemName,
+											catalogueName: catalogueName,
+											romFolderName: folderName,
 											games: games.sort((a, b) => a.baseName.localeCompare(b.baseName))
 										};
 									}
-								} catch (e) { /* Could not access system directory */ }
+								} catch (e) { /* Could not access ROM folder */ }
 							}
 						}
 					} catch (e) {
-						showError('Mustard OS catalogue structure not found. Please select the root of your SD card (where the MUOS folder is located).');
+						showError('ROMS folder not found. Please select the root of your SD card (the folder containing both ROMS and MUOS folders).');
 						return;
 					}
 				} else {
 					// Standard scanning for other devices
+					// Skip folders that are apps/system folders, not console ROM folders
+					const skipFolders = [
+						'funkey', '.picoarch', 'wolfenstein 3d', 'doom', 'quake',
+						'system', 'bios', 'save', 'saves', 'config', 'retroarch'
+					];
+
 					for await (const entry of directoryHandle.values()) {
 						if (entry.kind === 'directory') {
 							const consoleName = entry.name;
+							// Skip known non-console folders
+							if (skipFolders.includes(consoleName.toLowerCase())) continue;
+
 							const games = [];
 							try {
 								const consoleDir = await directoryHandle.getDirectoryHandle(consoleName);
@@ -3604,6 +3741,16 @@
 				document.getElementById('imageStatus').style.display = 'none';
 				loadGameImage(baseName);
 				updateNextGameButton();
+				// Show/hide saves button and local image rows based on device
+				const savesBtn = document.getElementById('savesButtonRow');
+				const noSavesRow = document.getElementById('noSavesButtonRow');
+				if (currentDevice === 'rgnano') {
+					savesBtn.style.display = 'block';
+					noSavesRow.style.display = 'none';
+				} else {
+					savesBtn.style.display = 'none';
+					noSavesRow.style.display = 'grid';
+				}
 				document.getElementById('gameModal').classList.add('active');
 			}
 
@@ -3919,6 +4066,22 @@
 				}
 			}
 
+			function autoCleanName() {
+				const input = document.getElementById('renameInput');
+				const currentName = input.value;
+				// Use cleanGameName logic but without extension handling since we don't have extension in input
+				let cleaned = currentName;
+				for (const pattern of cleanupPatterns) {
+					cleaned = cleaned.replace(pattern, pattern.source === '\\s+' ? ' ' : '');
+				}
+				cleaned = cleaned.trim();
+				if (cleaned !== currentName) {
+					input.value = cleaned;
+					input.focus();
+					input.select();
+				}
+			}
+
 			async function executeRename() {
 				const targetConsole = renameConsole || currentConsole;
 				if (!renameTarget || !targetConsole) return;
@@ -4012,6 +4175,14 @@
 					// Refresh after short delay
 					setTimeout(async () => {
 						closeModal('renameModal');
+
+						// Update the game modal with new name
+						if (currentGame === oldFileName) {
+							currentGame = newFileName;
+							document.getElementById('modalGameName').textContent = newName;
+							loadGameImage(newName);
+						}
+
 						renameTarget = null;
 						renameConsole = null;
 						await scanExistingDirectory();
@@ -4126,13 +4297,26 @@
 					let imageDir;
 
 					if (profile.catalogueStructure) {
-						// Trimui Brick / Mustard OS: Create/get box folder
+						// Trimui Brick / MustardOS: Box art goes in MUOS/info/catalogue/<system>/box/
 						if (consoles[targetConsole].boxHandle) {
 							imageDir = consoles[targetConsole].boxHandle;
 						} else {
-							const boxDir = await consoles[targetConsole].handle.getDirectoryHandle('box', { create: true });
-							consoles[targetConsole].boxHandle = boxDir;
-							imageDir = boxDir;
+							// Need to create box folder in catalogue structure
+							try {
+								const muosDir = await directoryHandle.getDirectoryHandle('MUOS', { create: true });
+								const infoDir = await muosDir.getDirectoryHandle('info', { create: true });
+								const catalogueDir = await infoDir.getDirectoryHandle('catalogue', { create: true });
+								const catalogueName = consoles[targetConsole].catalogueName || targetConsole;
+								const systemDir = await catalogueDir.getDirectoryHandle(catalogueName, { create: true });
+								const boxDir = await systemDir.getDirectoryHandle('box', { create: true });
+								consoles[targetConsole].boxHandle = boxDir;
+								imageDir = boxDir;
+							} catch (e) {
+								// Fallback: create box in ROM folder
+								const boxDir = await consoles[targetConsole].handle.getDirectoryHandle('box', { create: true });
+								consoles[targetConsole].boxHandle = boxDir;
+								imageDir = boxDir;
+							}
 						}
 					} else if (profile.emoji === '🧅') {
 						// Onion OS: Create/get Imgs folder
@@ -4184,7 +4368,7 @@
 				dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
 				dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
 				dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-				document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
+				document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) m.classList.remove('active'); }));
 			});
 
 			function handleFileSelect(e) { handleFiles(e.target.files); }
@@ -4254,6 +4438,229 @@
 						.then(reg => console.log('NanoArcade: Service Worker registered', reg.scope))
 						.catch(err => console.log('NanoArcade: Service Worker registration failed', err));
 				});
+			}
+
+			// ============================================
+			// Save Manager (RG Nano only)
+			// ============================================
+
+			// RG Nano emulator to console mapping
+			const rgNanoEmulatorMap = {
+				'gambatte': ['Game Boy', 'Game Boy Color', 'GB', 'GBC'],
+				'gpsp': ['Game Boy Advance', 'GBA'],
+				'fceumm': ['NES', 'Nintendo Entertainment System', 'FC', 'Famicom'],
+				'snes9x2005': ['SNES', 'Super Nintendo', 'SFC', 'Super Famicom'],
+				'picodrive': ['Sega Genesis', 'Genesis', 'Mega Drive', 'MD', 'Game Gear', 'GG'],
+				'pcsx_rearmed': ['PS1', 'PlayStation', 'PSX', 'PS']
+			};
+
+			function getEmulatorForConsole(consoleName) {
+				for (const [emulator, consoleNames] of Object.entries(rgNanoEmulatorMap)) {
+					if (consoleNames.some(c => c.toLowerCase() === consoleName.toLowerCase())) {
+						return emulator;
+					}
+				}
+				return null;
+			}
+
+			function openSaveManager() {
+				const gameName = currentGame;
+				const baseName = gameName.substring(0, gameName.lastIndexOf('.'));
+				document.getElementById('saveGameName').textContent = baseName;
+				document.getElementById('saveModal').classList.add('active');
+				loadLocalSaves(baseName);
+			}
+
+			async function loadLocalSaves(baseName) {
+				const list = document.getElementById('localSavesList');
+				list.innerHTML = '<div class="loading-container" style="padding: 2em;"><div class="spinner"></div><div class="loading-text">Checking for saves...</div></div>';
+
+				if (!directoryHandle || currentDevice !== 'rgnano') {
+					list.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6); padding: 2em;">Save management is only available for RG Nano devices.</p>';
+					return;
+				}
+
+				const emulator = getEmulatorForConsole(gameConsole || currentConsole);
+				if (!emulator) {
+					list.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6); padding: 2em;">Console not supported for save management.</p>';
+					return;
+				}
+
+				try {
+					// Navigate to FunKey/.picoarch/data/[emulator]/
+					const funKeyHandle = await directoryHandle.getDirectoryHandle('FunKey', { create: false }).catch(() => null);
+					if (!funKeyHandle) {
+						list.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6); padding: 2em;">No saves found. FunKey folder not detected.</p>';
+						return;
+					}
+
+					const picoarchHandle = await funKeyHandle.getDirectoryHandle('.picoarch', { create: false }).catch(() => null);
+					if (!picoarchHandle) {
+						list.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6); padding: 2em;">No saves found. Picoarch folder not detected.</p>';
+						return;
+					}
+
+					const dataHandle = await picoarchHandle.getDirectoryHandle('data', { create: false }).catch(() => null);
+					if (!dataHandle) {
+						list.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6); padding: 2em;">No saves found.</p>';
+						return;
+					}
+
+					const emulatorHandle = await dataHandle.getDirectoryHandle(emulator, { create: false }).catch(() => null);
+					if (!emulatorHandle) {
+						list.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6); padding: 2em;">No saves found for this console.</p>';
+						return;
+					}
+
+					// Look for save files matching the game name
+					const saves = [];
+					for await (const entry of emulatorHandle.values()) {
+						if (entry.kind === 'file' && entry.name.endsWith('.sav')) {
+							const saveBaseName = entry.name.substring(0, entry.name.lastIndexOf('.'));
+							// Check if this save matches the current game (fuzzy match)
+							if (saveBaseName.toLowerCase() === baseName.toLowerCase() ||
+								saveBaseName.toLowerCase().includes(baseName.toLowerCase()) ||
+								baseName.toLowerCase().includes(saveBaseName.toLowerCase())) {
+								const file = await entry.getFile();
+								saves.push({
+									name: entry.name,
+									handle: entry,
+									size: file.size,
+									modified: file.lastModified
+								});
+							}
+						}
+					}
+
+					if (saves.length === 0) {
+						list.innerHTML = `
+							<div style="text-align: center; padding: 2em; color: rgba(255,255,255,0.6);">
+								<span class="icon solid fa-folder-open" style="font-size: 2em; margin-bottom: 0.5em; display: block;"></span>
+								<p>No save files found for this game.</p>
+								<p style="font-size: 0.85em;">Save location: FunKey/.picoarch/data/${emulator}/</p>
+							</div>
+						`;
+						return;
+					}
+
+					// Display saves
+					let html = '';
+					for (const save of saves) {
+						const date = new Date(save.modified).toLocaleDateString();
+						const size = (save.size / 1024).toFixed(1) + ' KB';
+						html += `
+							<div style="display: flex; align-items: center; padding: 0.75em; background: rgba(34, 211, 238, 0.1); border-radius: 8px; margin-bottom: 0.5em;">
+								<span class="icon solid fa-save" style="color: #22d3ee; margin-right: 0.75em; font-size: 1.2em;"></span>
+								<div style="flex: 1;">
+									<div style="font-weight: 500;">${save.name}</div>
+									<div style="font-size: 0.8em; color: rgba(255,255,255,0.5);">${size} • ${date}</div>
+								</div>
+								<button class="btn-3d small" onclick="downloadSave('${save.name}')" title="Download">
+									<span class="icon solid fa-download"></span>
+								</button>
+								<button class="btn-3d small red" onclick="event.stopPropagation(); deleteSave('${save.name}')" title="Delete" style="margin-left: 0.25em;">
+									<span class="icon solid fa-trash"></span>
+								</button>
+							</div>
+						`;
+					}
+					list.innerHTML = html;
+
+				} catch (e) {
+					console.error('Error loading saves:', e);
+					list.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6); padding: 2em;">Error loading saves: ' + e.message + '</p>';
+				}
+			}
+
+			async function downloadSave(saveName) {
+				const emulator = getEmulatorForConsole(gameConsole || currentConsole);
+				try {
+					const funKeyHandle = await directoryHandle.getDirectoryHandle('FunKey');
+					const picoarchHandle = await funKeyHandle.getDirectoryHandle('.picoarch');
+					const dataHandle = await picoarchHandle.getDirectoryHandle('data');
+					const emulatorHandle = await dataHandle.getDirectoryHandle(emulator);
+					const fileHandle = await emulatorHandle.getFileHandle(saveName);
+					const file = await fileHandle.getFile();
+
+					// Create download
+					const url = URL.createObjectURL(file);
+					const a = document.createElement('a');
+					a.href = url;
+					a.download = saveName;
+					a.click();
+					URL.revokeObjectURL(url);
+				} catch (e) {
+					alert('Error downloading save: ' + e.message);
+				}
+			}
+
+			let pendingDeleteSave = null;
+
+			function deleteSave(saveName) {
+				pendingDeleteSave = saveName;
+				document.getElementById('deleteSaveConfirmText').innerHTML = `Are you sure you want to delete <strong>"${saveName}"</strong>?<br><span style="font-size: 0.85em; color: rgba(255,255,255,0.6);">This cannot be undone.</span>`;
+				document.getElementById('deleteSaveModal').classList.add('active');
+			}
+
+			async function executeDeleteSave() {
+				if (!pendingDeleteSave) return;
+
+				const saveName = pendingDeleteSave;
+				const emulator = getEmulatorForConsole(gameConsole || currentConsole);
+				try {
+					const funKeyHandle = await directoryHandle.getDirectoryHandle('FunKey');
+					const picoarchHandle = await funKeyHandle.getDirectoryHandle('.picoarch');
+					const dataHandle = await picoarchHandle.getDirectoryHandle('data');
+					const emulatorHandle = await dataHandle.getDirectoryHandle(emulator);
+					await emulatorHandle.removeEntry(saveName);
+
+					closeModal('deleteSaveModal');
+					pendingDeleteSave = null;
+
+					// Reload saves list
+					const baseName = currentGame.substring(0, currentGame.lastIndexOf('.'));
+					loadLocalSaves(baseName);
+				} catch (e) {
+					alert('Error deleting save: ' + e.message);
+				}
+			}
+
+			function uploadLocalSave() {
+				document.getElementById('saveFileInput').click();
+			}
+
+			async function handleSaveUpload(event) {
+				const file = event.target.files[0];
+				if (!file) return;
+
+				const emulator = getEmulatorForConsole(gameConsole || currentConsole);
+				if (!emulator) {
+					alert('Console not supported for save management.');
+					return;
+				}
+
+				try {
+					// Navigate to save folder, creating if needed
+					const funKeyHandle = await directoryHandle.getDirectoryHandle('FunKey', { create: true });
+					const picoarchHandle = await funKeyHandle.getDirectoryHandle('.picoarch', { create: true });
+					const dataHandle = await picoarchHandle.getDirectoryHandle('data', { create: true });
+					const emulatorHandle = await dataHandle.getDirectoryHandle(emulator, { create: true });
+
+					// Write save file
+					const fileHandle = await emulatorHandle.getFileHandle(file.name, { create: true });
+					const writable = await fileHandle.createWritable();
+					await writable.write(file);
+					await writable.close();
+
+					// Reload saves list
+					const baseName = currentGame.substring(0, currentGame.lastIndexOf('.'));
+					loadLocalSaves(baseName);
+
+					// Clear file input
+					event.target.value = '';
+				} catch (e) {
+					alert('Error uploading save: ' + e.message);
+				}
 			}
 
 			// PWA Install functionality
