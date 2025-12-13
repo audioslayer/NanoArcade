@@ -755,12 +755,14 @@
 				display: inline-flex;
 			}
 
-			/* Floating install PWA button */
+			/* Floating install PWA button - small, bottom right, only on intro */
 			.floating-install {
 				position: fixed;
-				bottom: 20px;
-				right: 20px;
+				bottom: 15px;
+				right: 15px;
 				z-index: 1000;
+				font-size: 0.7em;
+				padding: 0.5em 0.8em;
 			}
 
 			/* Modern Hero Section */
@@ -2992,6 +2994,8 @@
 				// Hide intro, show games
 				document.getElementById('intro').style.display = 'none';
 				document.getElementById('games').style.display = 'block';
+				// Hide install button when leaving intro
+				document.getElementById('installPwaBtn').style.display = 'none';
 				// Show loading spinner
 				const grid = document.getElementById('gamesGrid');
 				grid.innerHTML = '<div class="loading-container"><div class="spinner"></div><div class="loading-text">Loading games...</div></div>';
@@ -3008,8 +3012,9 @@
 				currentConsole = '__all__';
 				document.getElementById('currentConsoleName').textContent = 'All Games';
 				document.getElementById('floatingUpload').classList.add('visible');
-				// Hide intro, show games
+				// Hide intro, show games, hide install button
 				document.getElementById('intro').style.display = 'none';
+				document.getElementById('installPwaBtn').style.display = 'none';
 				document.getElementById('games').style.display = 'block';
 				// Show loading spinner
 				const grid = document.getElementById('gamesGrid');
@@ -3073,6 +3078,10 @@
 				document.getElementById('currentConsoleName').textContent = 'Select a console to view games';
 				document.getElementById('gamesGrid').innerHTML = '<p>Scan your drive to view games</p>';
 				window.scrollTo(0, 0);
+				// Show install button again if PWA install is available
+				if (deferredPrompt) {
+					document.getElementById('installPwaBtn').style.display = 'inline-flex';
+				}
 			}
 
 			async function renderGames() {
