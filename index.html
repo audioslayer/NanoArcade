@@ -916,6 +916,12 @@
 				flex-wrap: wrap;
 			}
 
+			.console-header-icon {
+				width: 48px;
+				height: 48px;
+				object-fit: contain;
+			}
+
 			.game-count-badge {
 				background: rgba(59, 130, 246, 0.2);
 				color: #60a5fa;
@@ -1128,6 +1134,7 @@
 			<section id="games" class="wrapper style1 fade-up" style="display:none;">
 				<div class="inner">
 					<div class="console-header">
+						<img id="currentConsoleIcon" class="console-header-icon" src="" alt="" style="display:none;">
 						<h2 id="currentConsoleName">Select a console to view games</h2>
 						<span class="game-count-badge" id="gameCountBadge" style="display:none;">
 							<span id="totalGameCount">0</span> games
@@ -3181,7 +3188,13 @@
 
 			async function selectConsole(name) {
 				currentConsole = name;
-				document.getElementById('currentConsoleName').textContent = name;
+				const displayName = getConsoleDisplayName(name);
+				document.getElementById('currentConsoleName').textContent = displayName;
+				// Set console icon in header
+				const iconEl = document.getElementById('currentConsoleIcon');
+				iconEl.src = getConsoleIcon(name);
+				iconEl.alt = displayName;
+				iconEl.style.display = 'block';
 				document.getElementById('floatingUpload').classList.add('visible');
 				// Hide intro, show games
 				document.getElementById('intro').style.display = 'none';
@@ -3203,6 +3216,8 @@
 			async function selectAllGames() {
 				currentConsole = '__all__';
 				document.getElementById('currentConsoleName').textContent = 'All Games';
+				// Hide console icon for All Games view
+				document.getElementById('currentConsoleIcon').style.display = 'none';
 				document.getElementById('floatingUpload').classList.add('visible');
 				// Hide intro, show games, hide install button
 				document.getElementById('intro').style.display = 'none';
@@ -3268,6 +3283,7 @@
 				document.getElementById('intro').style.display = '';
 				document.getElementById('games').style.display = 'none';
 				document.getElementById('currentConsoleName').textContent = 'Select a console to view games';
+				document.getElementById('currentConsoleIcon').style.display = 'none';
 				document.getElementById('gamesGrid').innerHTML = '<p>Scan your drive to view games</p>';
 				window.scrollTo(0, 0);
 				// Show install button again if PWA install is available
