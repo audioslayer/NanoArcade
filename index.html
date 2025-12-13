@@ -1083,6 +1083,9 @@
 						<button class="btn-3d purple" onclick="showDeviceSelector()">
 							<span class="icon solid fa-gamepad"></span> Select Device
 						</button>
+						<button class="btn-3d green" id="installPwaBtn" style="display: none;" onclick="installPwa()">
+							<span class="icon solid fa-download"></span> Install App
+						</button>
 					</div>
 					<div style="margin-top: 1.5em; padding: 1em 1.5em; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; max-width: 600px; margin-left: auto; margin-right: auto;">
 						<p style="font-size: 0.85em; color: rgba(255,255,255,0.8); margin: 0; line-height: 1.5;">
@@ -4024,6 +4027,43 @@
 						.then(reg => console.log('NanoArcade: Service Worker registered', reg.scope))
 						.catch(err => console.log('NanoArcade: Service Worker registration failed', err));
 				});
+			}
+
+			// PWA Install functionality
+			let deferredPrompt;
+
+			window.addEventListener('beforeinstallprompt', (e) => {
+				// Prevent Chrome from showing the default prompt
+				e.preventDefault();
+				// Save the event for later
+				deferredPrompt = e;
+				// Show our install button
+				document.getElementById('installPwaBtn').style.display = 'inline-flex';
+				console.log('NanoArcade: Install prompt ready');
+			});
+
+			window.addEventListener('appinstalled', () => {
+				// Hide the install button after installation
+				document.getElementById('installPwaBtn').style.display = 'none';
+				deferredPrompt = null;
+				console.log('NanoArcade: App installed successfully');
+			});
+
+			async function installPwa() {
+				if (!deferredPrompt) {
+					// Already installed or not supported
+					alert('App is already installed or installation is not available in this browser.');
+					return;
+				}
+				// Show the install prompt
+				deferredPrompt.prompt();
+				// Wait for user response
+				const { outcome } = await deferredPrompt.userChoice;
+				console.log('NanoArcade: Install prompt outcome:', outcome);
+				// Clear the prompt
+				deferredPrompt = null;
+				// Hide button regardless of outcome
+				document.getElementById('installPwaBtn').style.display = 'none';
 			}
 		</script>
 
