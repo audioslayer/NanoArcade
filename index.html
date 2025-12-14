@@ -22,6 +22,176 @@
 		<link href="https://fonts.googleapis.com/css2?family=Cookie&family=Press+Start+2P&display=swap" rel="stylesheet">
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 		<style>
+			/* Theme CSS Variables */
+			:root {
+				--theme-primary: #3b82f6;
+				--theme-primary-dark: #1d4ed8;
+				--theme-primary-glow: rgba(59, 130, 246, 0.4);
+				--theme-primary-light: #60a5fa;
+				--theme-accent: #3b82f6;
+				--theme-bg-gradient-start: #1a1a2e;
+				--theme-bg-gradient-end: #16213e;
+				--theme-text-glow: 0 0 8px rgba(96, 165, 250, 0.6), 0 0 15px rgba(59, 130, 246, 0.4);
+				--theme-sidebar-bg: #1e3a5f;
+				--theme-footer-bg: #1e40af;
+				--theme-nav-underline: #1e4976;
+			}
+
+			/* Blue Theme (Default) */
+			[data-theme="blue"] {
+				--theme-primary: #3b82f6;
+				--theme-primary-dark: #1d4ed8;
+				--theme-primary-glow: rgba(59, 130, 246, 0.4);
+				--theme-primary-light: #60a5fa;
+				--theme-accent: #3b82f6;
+				--theme-bg-gradient-start: #1a1a2e;
+				--theme-bg-gradient-end: #16213e;
+				--theme-text-glow: 0 0 8px rgba(96, 165, 250, 0.6), 0 0 15px rgba(59, 130, 246, 0.4);
+				--theme-sidebar-bg: #1e3a5f;
+				--theme-footer-bg: #1e40af;
+				--theme-nav-underline: #1e4976;
+			}
+
+			/* Purple Theme */
+			[data-theme="purple"] {
+				--theme-primary: #8b5cf6;
+				--theme-primary-dark: #6d28d9;
+				--theme-primary-glow: rgba(139, 92, 246, 0.4);
+				--theme-primary-light: #a78bfa;
+				--theme-accent: #8b5cf6;
+				--theme-bg-gradient-start: #1a1a2e;
+				--theme-bg-gradient-end: #2d1b4e;
+				--theme-text-glow: 0 0 8px rgba(167, 139, 250, 0.6), 0 0 15px rgba(139, 92, 246, 0.4);
+				--theme-sidebar-bg: #2d1b4e;
+				--theme-footer-bg: #5b21b6;
+				--theme-nav-underline: #4c1d95;
+			}
+
+			/* Green Theme */
+			[data-theme="green"] {
+				--theme-primary: #22c55e;
+				--theme-primary-dark: #15803d;
+				--theme-primary-glow: rgba(34, 197, 94, 0.4);
+				--theme-primary-light: #4ade80;
+				--theme-accent: #22c55e;
+				--theme-bg-gradient-start: #0f1a14;
+				--theme-bg-gradient-end: #14291e;
+				--theme-text-glow: 0 0 8px rgba(74, 222, 128, 0.6), 0 0 15px rgba(34, 197, 94, 0.4);
+				--theme-sidebar-bg: #14532d;
+				--theme-footer-bg: #166534;
+				--theme-nav-underline: #15803d;
+			}
+
+			/* Red Theme */
+			[data-theme="red"] {
+				--theme-primary: #ef4444;
+				--theme-primary-dark: #b91c1c;
+				--theme-primary-glow: rgba(239, 68, 68, 0.4);
+				--theme-primary-light: #f87171;
+				--theme-accent: #ef4444;
+				--theme-bg-gradient-start: #1a1212;
+				--theme-bg-gradient-end: #2e1a1a;
+				--theme-text-glow: 0 0 8px rgba(248, 113, 113, 0.6), 0 0 15px rgba(239, 68, 68, 0.4);
+				--theme-sidebar-bg: #7f1d1d;
+				--theme-footer-bg: #991b1b;
+				--theme-nav-underline: #b91c1c;
+			}
+
+			/* Cyan Theme */
+			[data-theme="cyan"] {
+				--theme-primary: #06b6d4;
+				--theme-primary-dark: #0891b2;
+				--theme-primary-glow: rgba(6, 182, 212, 0.4);
+				--theme-primary-light: #22d3ee;
+				--theme-accent: #06b6d4;
+				--theme-bg-gradient-start: #0f1a1c;
+				--theme-bg-gradient-end: #0f2937;
+				--theme-text-glow: 0 0 8px rgba(34, 211, 238, 0.6), 0 0 15px rgba(6, 182, 212, 0.4);
+				--theme-sidebar-bg: #164e63;
+				--theme-footer-bg: #155e75;
+				--theme-nav-underline: #0e7490;
+			}
+
+			/* Orange/Gold Theme */
+			[data-theme="orange"] {
+				--theme-primary: #f59e0b;
+				--theme-primary-dark: #d97706;
+				--theme-primary-glow: rgba(245, 158, 11, 0.4);
+				--theme-primary-light: #fbbf24;
+				--theme-accent: #f59e0b;
+				--theme-bg-gradient-start: #1a1610;
+				--theme-bg-gradient-end: #2e2415;
+				--theme-text-glow: 0 0 8px rgba(251, 191, 36, 0.6), 0 0 15px rgba(245, 158, 11, 0.4);
+				--theme-sidebar-bg: #78350f;
+				--theme-footer-bg: #92400e;
+				--theme-nav-underline: #b45309;
+			}
+
+			/* Pink Theme */
+			[data-theme="pink"] {
+				--theme-primary: #ec4899;
+				--theme-primary-dark: #be185d;
+				--theme-primary-glow: rgba(236, 72, 153, 0.4);
+				--theme-primary-light: #f472b6;
+				--theme-accent: #ec4899;
+				--theme-bg-gradient-start: #1a1018;
+				--theme-bg-gradient-end: #2e1528;
+				--theme-text-glow: 0 0 8px rgba(244, 114, 182, 0.6), 0 0 15px rgba(236, 72, 153, 0.4);
+				--theme-sidebar-bg: #831843;
+				--theme-footer-bg: #9d174d;
+				--theme-nav-underline: #be185d;
+			}
+
+			/* Apply theme to sidebar and footer */
+			#sidebar {
+				background: var(--theme-sidebar-bg) !important;
+			}
+
+			#footer.wrapper.style1-alt {
+				background-color: var(--theme-footer-bg) !important;
+			}
+
+			#sidebar nav a:before {
+				background: var(--theme-nav-underline) !important;
+			}
+
+			#sidebar nav a:after {
+				background-image: linear-gradient(to right, var(--theme-primary-dark), var(--theme-primary)) !important;
+			}
+
+			/* Apply theme to main content wrapper backgrounds */
+			.wrapper.alt {
+				background-color: var(--theme-bg-gradient-start) !important;
+			}
+
+			.wrapper.style1 {
+				background-color: var(--theme-primary) !important;
+			}
+
+			.wrapper.style1-alt {
+				background-color: var(--theme-primary-dark) !important;
+			}
+
+			.wrapper.style2 {
+				background-color: var(--theme-primary-dark) !important;
+			}
+
+			.wrapper.style2-alt {
+				background-color: var(--theme-sidebar-bg) !important;
+			}
+
+			.wrapper.style3 {
+				background-color: var(--theme-primary) !important;
+			}
+
+			.wrapper.style3-alt {
+				background-color: var(--theme-primary-dark) !important;
+			}
+
+			#wrapper {
+				background-color: var(--theme-bg-gradient-start) !important;
+			}
+
 			/* Custom styles for NanoArcade */
 			#sidebar nav ul li {
 				display: flex;
@@ -34,7 +204,7 @@
 				font-family: 'Press Start 2P', cursive;
 				font-size: 0.4em;
 				line-height: 1.4;
-				text-shadow: 0 0 8px rgba(96, 165, 250, 0.6), 0 0 15px rgba(59, 130, 246, 0.4);
+				text-shadow: var(--theme-text-glow);
 				border: none !important;
 				background: none !important;
 				outline: none !important;
@@ -122,7 +292,7 @@
 
 			.game-card:hover {
 				transform: translateY(-5px);
-				box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+				box-shadow: 0 10px 30px var(--theme-primary-glow);
 			}
 
 			.game-card .image-container {
@@ -171,7 +341,7 @@
 				position: absolute;
 				top: 5px;
 				right: 5px;
-				background: #3b82f6;
+				background: var(--theme-primary);
 				color: #fff;
 				padding: 3px 8px;
 				border-radius: 3px;
@@ -254,7 +424,7 @@
 
 			.stat-box .value {
 				font-size: 2em;
-				color: #60a5fa;
+				color: var(--theme-primary-light);
 				font-weight: bold;
 			}
 
@@ -460,13 +630,13 @@
 			}
 
 			.modal-box {
-				background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+				background: linear-gradient(145deg, var(--theme-bg-gradient-start) 0%, var(--theme-bg-gradient-end) 100%);
 				padding: 1.5em;
 				border-radius: 20px;
 				max-width: 600px;
 				width: 90%;
-				border: 2px solid #3b82f6;
-				box-shadow: 0 0 30px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1), inset 0 1px 0 rgba(255,255,255,0.1);
+				border: 2px solid var(--theme-primary);
+				box-shadow: 0 0 30px var(--theme-primary-glow), 0 0 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
 				position: relative;
 			}
 
@@ -1110,7 +1280,7 @@
 			.context-menu {
 				position: fixed;
 				background: #1e293b;
-				border: 1px solid #3b82f6;
+				border: 1px solid var(--theme-primary);
 				border-radius: 8px;
 				box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 				z-index: 10002;
@@ -1135,11 +1305,11 @@
 			}
 
 			.context-menu-item:hover {
-				background: rgba(59, 130, 246, 0.2);
+				background: var(--theme-primary-glow);
 			}
 
 			.context-menu-item .icon {
-				color: #60a5fa;
+				color: var(--theme-primary-light);
 				width: 16px;
 				text-align: center;
 			}
@@ -1176,8 +1346,8 @@
 			}
 
 			.device-card:hover {
-				background: rgba(59, 130, 246, 0.15);
-				border-color: #3b82f6;
+				background: var(--theme-primary-glow);
+				border-color: var(--theme-primary);
 				transform: translateY(-3px);
 			}
 
@@ -1211,21 +1381,100 @@
 				align-items: center;
 				gap: 8px;
 				padding: 8px 12px;
-				background: rgba(59, 130, 246, 0.2);
+				background: var(--theme-primary-glow);
 				border-radius: 8px;
 				margin-bottom: 1em;
 				font-size: 0.85em;
-				color: #60a5fa;
+				color: var(--theme-primary-light);
 				cursor: pointer;
 				transition: background 0.2s;
 			}
 
 			.current-device:hover {
-				background: rgba(59, 130, 246, 0.3);
+				background: var(--theme-primary-glow);
+				filter: brightness(1.2);
 			}
 
 			.current-device .device-emoji {
 				font-size: 1.2em;
+			}
+
+			/* Theme selector button */
+			.theme-btn {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 8px 12px;
+				background: rgba(255,255,255,0.05);
+				border: 1px solid rgba(255,255,255,0.1);
+				border-radius: 8px;
+				margin-top: 0.5em;
+				font-size: 0.85em;
+				color: rgba(255,255,255,0.7);
+				cursor: pointer;
+				transition: all 0.2s;
+			}
+
+			.theme-btn:hover {
+				background: var(--theme-primary-glow);
+				border-color: var(--theme-primary);
+				color: #fff;
+			}
+
+			/* Theme grid */
+			.theme-grid {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 1em;
+			}
+
+			.theme-card {
+				background: rgba(255,255,255,0.05);
+				border: 2px solid rgba(255,255,255,0.1);
+				border-radius: 12px;
+				padding: 1.25em 1em 1em 1em;
+				text-align: center;
+				cursor: pointer;
+				transition: all 0.2s ease;
+				overflow: hidden;
+			}
+
+			.theme-card:hover {
+				transform: translateY(-3px);
+			}
+
+			.theme-card.active {
+				border-color: #fff;
+				box-shadow: 0 0 20px rgba(255,255,255,0.2);
+			}
+
+			.theme-card .theme-preview {
+				width: 45px;
+				height: 45px;
+				border-radius: 50%;
+				margin: 0 auto 0.5em;
+				box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+			}
+
+			.theme-card .theme-name {
+				font-size: 0.75em;
+				color: #fff;
+				font-weight: 500;
+			}
+
+			/* Theme preview colors */
+			.theme-preview.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+			.theme-preview.purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+			.theme-preview.green { background: linear-gradient(135deg, #22c55e, #15803d); }
+			.theme-preview.red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+			.theme-preview.cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+			.theme-preview.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+			.theme-preview.pink { background: linear-gradient(135deg, #ec4899, #be185d); }
+
+			@media screen and (max-width: 600px) {
+				.theme-grid {
+					grid-template-columns: repeat(3, 1fr);
+				}
 			}
 
 			@media screen and (max-width: 600px) {
@@ -1259,7 +1508,10 @@
 						<li><a href="#intro">Home</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: #fff; font-style: italic; text-shadow: 0 0 8px rgba(96, 165, 250, 0.6), 0 0 15px rgba(59, 130, 246, 0.4);">Version 1.4</div>
+				<div class="theme-btn" onclick="showThemeSelector()" style="position: absolute; bottom: 45px; left: 15px; right: 15px;">
+					<span class="icon solid fa-palette"></span> Theme
+				</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.5</div>
 			</div>
 		</section>
 
@@ -1634,6 +1886,47 @@
 			</div>
 		</div>
 
+		<!-- Theme Selector Modal -->
+		<div class="modal-overlay" id="themeModal">
+			<div class="modal-box" style="max-width: 500px;">
+				<div class="modal-header">
+					<h3><span class="icon solid fa-palette"></span> Choose Theme</h3>
+					<button class="close-btn" onclick="closeModal('themeModal')">&times;</button>
+				</div>
+				<p style="color: rgba(255,255,255,0.7); margin-bottom: 1.5em; text-align: center;">Select a color theme for your NanoArcade experience.</p>
+				<div class="theme-grid">
+					<div class="theme-card" onclick="setTheme('blue')" data-theme-card="blue">
+						<div class="theme-preview blue"></div>
+						<div class="theme-name">Blue</div>
+					</div>
+					<div class="theme-card" onclick="setTheme('purple')" data-theme-card="purple">
+						<div class="theme-preview purple"></div>
+						<div class="theme-name">Purple</div>
+					</div>
+					<div class="theme-card" onclick="setTheme('green')" data-theme-card="green">
+						<div class="theme-preview green"></div>
+						<div class="theme-name">Green</div>
+					</div>
+					<div class="theme-card" onclick="setTheme('red')" data-theme-card="red">
+						<div class="theme-preview red"></div>
+						<div class="theme-name">Red</div>
+					</div>
+					<div class="theme-card" onclick="setTheme('cyan')" data-theme-card="cyan">
+						<div class="theme-preview cyan"></div>
+						<div class="theme-name">Cyan</div>
+					</div>
+					<div class="theme-card" onclick="setTheme('orange')" data-theme-card="orange">
+						<div class="theme-preview orange"></div>
+						<div class="theme-name">Orange</div>
+					</div>
+					<div class="theme-card" onclick="setTheme('pink')" data-theme-card="pink">
+						<div class="theme-preview pink"></div>
+						<div class="theme-name">Pink</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- Error Modal -->
 		<div class="modal-overlay" id="errorModal">
 			<div class="modal-box" style="max-width: 500px;">
@@ -1679,7 +1972,7 @@
 		<!-- Footer -->
 		<footer id="footer" class="wrapper style1-alt">
 			<div class="inner">
-				<span class="version-number">v1.4</span>
+				<span class="version-number">v1.5</span>
 			</div>
 		</footer>
 
@@ -1705,6 +1998,46 @@
 			let contextMenuConsole = null;
 			let currentDevice = 'rgnano';
 			let objectURLs = []; // Track object URLs for cleanup
+			let currentTheme = 'blue';
+
+			// Theme functions
+			function initTheme() {
+				const savedTheme = localStorage.getItem('nanoarcade-theme') || 'blue';
+				setTheme(savedTheme, false);
+			}
+
+			function showThemeSelector() {
+				// Update active state on cards
+				document.querySelectorAll('.theme-card').forEach(card => {
+					card.classList.remove('active');
+					if (card.dataset.themeCard === currentTheme) {
+						card.classList.add('active');
+					}
+				});
+				document.getElementById('themeModal').classList.add('active');
+			}
+
+			function setTheme(themeName, save = true) {
+				currentTheme = themeName;
+				document.documentElement.setAttribute('data-theme', themeName);
+
+				// Update active state on cards if modal is open
+				document.querySelectorAll('.theme-card').forEach(card => {
+					card.classList.remove('active');
+					if (card.dataset.themeCard === themeName) {
+						card.classList.add('active');
+					}
+				});
+
+				// Save to localStorage
+				if (save) {
+					localStorage.setItem('nanoarcade-theme', themeName);
+					closeModal('themeModal');
+				}
+			}
+
+			// Initialize theme on page load
+			document.addEventListener('DOMContentLoaded', initTheme);
 
 			// Helper to create data URL from blob (works on file:// protocol)
 			function blobToDataURL(blob) {
