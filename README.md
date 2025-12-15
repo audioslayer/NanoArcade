@@ -21,52 +21,52 @@ Or download this repository for offline use.
 
 ## Features
 
-### Device Support
+### :joystick: Device Support
 - **Multi-Device Selector** - Switch between device profiles with different folder structures and image sizes
 - **Onion OS Integration** - Full support for Onion OS folder structure (`Roms/[Console]/Imgs/`)
 - **Mustard OS Integration** - Full support for Mustard OS catalogue structure (`MUOS/info/catalogue/<System>/box/`)
 - **Auto-Resize** - Images automatically resized to optimal dimensions per device (240px for RG Nano, 250px for Miyoo, 354px for Trimui Brick)
 
-### Theme System (NEW in v1.5!)
+### :art: Theme System (NEW in v1.5!)
 - **7 Color Themes** - Choose from Blue, Purple, Green, Red, Cyan, Orange, Pink
 - **Persistent Selection** - Theme saves via localStorage
 
-### GameFAQs Integration
+### :video_game: GameFAQs Integration
 - **Dual Search** - Box art searched from both TheGamesDB and GameFAQs simultaneously
 - **Game Info Display** - Rating, Difficulty, and Length shown in game modal
 - **Styled Tooltips** - Hover for detailed breakdowns (votes, verdicts, playtime)
 
-### Save Manager
+### :floppy_disk: Save Manager
 - **Multi-Device Support** - Backup, restore, and delete game saves for RG Nano and Miyoo devices (Onion OS)
 - **Emulator Core Mapping** - Automatic save path detection for Gambatte, gpSP, FCEUmm, Supafaust, and more
 - **Delete Confirmation** - Modal confirmation prevents accidental deletions
 
-### Top 25 Must-Have Games
+### :trophy: Top 25 Must-Have Games
 - **Curated Lists** - Top 25 rated games for 16 different consoles
 - **Collection Tracker** - See which must-have games you own vs missing
 - **Quick Upload** - Drag & drop missing ROMs directly into the Top 25 modal
 - **Supported Consoles**: GB, GBC, GBA, NES, SNES, N64, Genesis, Game Gear, Master System, PS1, PC Engine, Neo Geo, Neo Geo Pocket, Atari 2600, Atari Lynx, WonderSwan
 
-### Box Art Management
+### :frame_with_picture: Box Art Management
 - **Dual Image Search** - Search TheGamesDB and GameFAQs for box art
 - **Upload Local Images** - Drag & drop or browse for local artwork
 - **URL Import** - Paste image URLs directly with automatic download
 - **Smart Processing** - Auto-resize, format conversion, and optimization
 
-### Organization & Filtering
+### :file_folder: Organization & Filtering
 - **Console Detection** - Automatically detects and organizes games by console folder
 - **Missing Art Filter** - Quickly find games that need artwork
 - **A-Z Sorting** - Toggle alphabetical sorting
 - **Search** - Filter games by name
 - **All Games View** - Browse your entire collection across all consoles
 
-### Game Management
+### :hammer_and_wrench: Game Management
 - **Batch Upload** - Upload multiple ROMs with automatic filename cleaning
 - **Right-Click Menu** - Quick actions: edit art, search, rename, delete
 - **Google Images Integration** - One-click search for hard-to-find artwork
 - **Rename & Delete** - Manage your ROM files directly
 
-### User Experience
+### :sparkles: User Experience
 - **Responsive Design** - Mobile-friendly hamburger menu for screens ≤1292px
 - **Browser Detection** - Friendly warning for unsupported browsers (Firefox)
 - **Subfolder Support** - Automatically scans nested ROM folders with visual indicators
