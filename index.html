@@ -2354,16 +2354,16 @@
 				<p style="color: rgba(255,255,255,0.7); margin-bottom: 1.5em; text-align: center;">Choose the image resolution for your MinUI device.</p>
 				<div class="device-grid" style="grid-template-columns: 1fr 1fr;">
 					<div class="device-card" onclick="selectMinUIResolution('minui480')">
-						<div class="device-icon">📱</div>
-						<div class="device-name">480p</div>
+						<img src="assets/images/devices/trimsmart.png" alt="Trimui Smart" class="device-image">
+						<div class="device-name">Standard</div>
 						<div class="device-desc">200px images</div>
-						<div style="margin-top: 0.5em; font-size: 0.85em; color: rgba(255,255,255,0.5);">For RGB30, RG35XX, Trimui Smart</div>
+						<div style="margin-top: 0.5em; font-size: 0.85em; color: rgba(255,255,255,0.5);">RGB30, RG35XX, Trimui Smart</div>
 					</div>
 					<div class="device-card" onclick="selectMinUIResolution('minui1080')">
-						<div class="device-icon">🖥️</div>
+						<img src="assets/images/devices/rg405.png" alt="RG405" class="device-image">
 						<div class="device-name">High-Res</div>
 						<div class="device-desc">300px images</div>
-						<div style="margin-top: 0.5em; font-size: 0.85em; color: rgba(255,255,255,0.5);">For RG353 series, RG405 series</div>
+						<div style="margin-top: 0.5em; font-size: 0.85em; color: rgba(255,255,255,0.5);">RG353 series, RG405 series</div>
 					</div>
 				</div>
 			</div>
@@ -2842,11 +2842,11 @@
 					}
 				},
 				minui480: {
-					name: 'MinUI (480p)',
+					name: 'MinUI (Standard)',
 					emoji: '🎮',
 					imageSize: 200,
 					isMinUI: true,
-					resolution: '480p',
+					resolution: 'standard',
 					folderMap: {
 						'GB': ['Game Boy (GB)'],
 						'GBC': ['Game Boy Color (GBC)'],
