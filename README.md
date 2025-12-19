@@ -45,6 +45,7 @@ Or download this repository for offline use.
 - **Emulator Core Mapping** - Automatic save path detection for Gambatte, gpSP, FCEUmm, Supafaust, and more
 - **MinUI/NextUI Support** - Manages saves in `.userdata/[system]/Saves/` folders
 - **Delete Confirmation** - Modal confirmation prevents accidental deletions
+- **Hidden File Filtering** - Automatically ignores hidden files/folders (starting with `.`) except `.res` and `.media` used by MinUI/NextUI
 
 ### :trophy: Top 25 Must-Have Games
 - **Curated Lists** - Top 25 rated games for 16 different consoles
@@ -183,6 +184,8 @@ The app recognizes and displays icons for:
 
 ### v1.7
 :framed_picture: **NextUI Resolution Selector** - NextUI devices can choose between Standard (200px for RG35XX SP), High-Res (300px for Trimui Brick), or Ultra (400px for Trimui Smart Pro) via resolution selector modal
+
+:see_no_evil: **Hidden File Filtering** - Automatically ignores hidden files and folders (starting with `.`) to prevent scanning ScummVM data and other system files, while preserving `.res` and `.media` folders needed by MinUI/NextUI
 
 ### v1.6
 :rocket: **MinUI Support** - Full support for MinUI operating system with `.res` folder structure and console tag parsing (e.g., "Game Boy (GB)")

@@ -3981,6 +3981,9 @@
 				const skipNames = ['gamelist', 'miyoogamelist'];
 
 				for await (const entry of dirHandle.values()) {
+					// Skip hidden files and folders (starting with .), EXCEPT .res and .media (used by MinUI/NextUI)
+					if (entry.name.startsWith('.') && entry.name !== '.res' && entry.name !== '.media') continue;
+
 					if (entry.kind === 'file') {
 						// Skip files without extensions
 						if (!entry.name.includes('.')) continue;
