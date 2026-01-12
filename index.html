@@ -2464,7 +2464,7 @@
 				<button class="btn-3d purple" onclick="showThemeSelector(); toggleMobileMenu();" style="margin-bottom: 10px;">
 					<span class="icon solid fa-palette"></span> Theme
 				</button>
-				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8</div>
+				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.1</div>
 			</div>
 		</div>
 
@@ -2497,7 +2497,7 @@
 						<li><a href="javascript:void(0);" onclick="showThemeSelector(); return false;"><span class="icon solid fa-palette"></span> Theme</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.1</div>
 			</div>
 		</section>
 
@@ -5114,12 +5114,12 @@
 				if (depth > MAX_DEPTH) return [];
 
 				const files = [];
-				const skipExts = ['.png', '.jpg', '.jpeg', '.txt', '.cue', '.m3u', '.srm', '.sav', '.xml', '.json', '.db', '.cfg'];
+				const skipExts = ['.png', '.jpg', '.jpeg', '.txt', '.cue', '.srm', '.sav', '.xml', '.json', '.db', '.cfg'];
 				const skipNames = ['gamelist', 'miyoogamelist'];
 
 				for await (const entry of dirHandle.values()) {
-					// Skip hidden files and folders (starting with .), EXCEPT .res and .media (used by MinUI/NextUI)
-					if (entry.name.startsWith('.') && entry.name !== '.res' && entry.name !== '.media') continue;
+					// Skip hidden files and folders (starting with .), EXCEPT .res/.media (MinUI/NextUI) and .multidisc (multi-disc games)
+					if (entry.name.startsWith('.') && entry.name !== '.res' && entry.name !== '.media' && entry.name !== '.multidisc') continue;
 
 					if (entry.kind === 'file') {
 						// Skip files without extensions
@@ -6142,46 +6142,63 @@
 
 			function getConsoleKey(consoleName) {
 				// Map folder names to topGamesData keys
-				// Includes MustardOS folder names (lowercase) for Trimui Brick support
+				// Includes MustardOS/MUOS folder names AND catalogue display names for full Top 25 support
 				const mapping = {
 					// Nintendo Handhelds
 					'Game Boy': 'GB', 'GB': 'GB', 'gameboy': 'GB', 'Gameboy': 'GB', 'gb': 'GB',
+					'Nintendo Game Boy': 'GB', // MUOS catalogue name
 					'Game Boy Color': 'GBC', 'GBC': 'GBC', 'gameboycolor': 'GBC', 'gbc': 'GBC',
 					'Game Boy Advance': 'GBA', 'GBA': 'GBA', 'gameboyadvance': 'GBA', 'gba': 'GBA',
+					'Nintendo Game Boy Advance': 'GBA', // MUOS catalogue name
 					'NDS': 'NDS', 'Nintendo DS': 'NDS', 'nds': 'NDS', 'DS': 'NDS', 'ds': 'NDS',
 					// Nintendo Home
 					'NES': 'NES', 'FC': 'NES', 'Famicom': 'NES', 'famicom': 'NES', 'nes': 'NES', 'fds': 'NES', 'fc': 'NES',
+					'Nintendo NES - Famicom': 'NES', // MUOS catalogue name
+					'Nintendo Famicom Disk System': 'NES', // MUOS catalogue name
 					'SNES': 'SNES', 'SFC': 'SNES', 'Super Famicom': 'SNES', 'superfamicom': 'SNES', 'snes': 'SNES', 'sfc': 'SNES',
+					'Nintendo SNES - SFC': 'SNES', // MUOS catalogue name
 					'N64': 'N64', 'Nintendo 64': 'N64', 'nintendo64': 'N64', 'n64': 'N64',
+					'Nintendo N64': 'N64', // MUOS catalogue name
 					'Virtual Boy': 'Virtual Boy', 'VB': 'Virtual Boy', 'virtualboy': 'Virtual Boy', 'vb': 'Virtual Boy',
+					'Nintendo Virtual Boy': 'Virtual Boy', // MUOS catalogue name
 					// Sega
 					'Genesis': 'Genesis', 'MD': 'Genesis', 'Sega Genesis': 'Genesis', 'Mega Drive': 'Genesis', 'megadrive': 'Genesis', 'segamd': 'Genesis', 'genesis': 'Genesis', 'md': 'Genesis',
+					'Sega Mega Drive - Genesis': 'Genesis', // MUOS catalogue name
 					'Game Gear': 'Game Gear', 'GG': 'Game Gear', 'gamegear': 'Game Gear', 'gg': 'Game Gear',
-					'Master System': 'Master System', 'MS': 'Master System', 'Sega Master System': 'Master System', 'SMS': 'Master System', 'mastersystem': 'Master System', 'sms': 'Master System',
-					'Sega CD': 'Sega CD', 'segacd': 'Sega CD', 'mdcd': 'Sega CD', 'Mega CD': 'Sega CD', 'segamdcd': 'Sega CD',
-					'Sega 32X': 'Sega 32X', 'sega32x': 'Sega 32X', '32X': 'Sega 32X',
-					'Saturn': 'Saturn', 'saturn': 'Saturn', 'Sega Saturn': 'Saturn',
+					'Sega Game Gear': 'Game Gear', // MUOS catalogue name
+					'Master System': 'Master System', 'MS': 'Master System', 'Sega Master System': 'Master System', 'SMS': 'Master System', 'mastersystem': 'Master System', 'sms': 'Master System', 'ms': 'Master System',
+					'Sega CD': 'Sega CD', 'segacd': 'Sega CD', 'mdcd': 'Sega CD', 'Mega CD': 'Sega CD', 'segamdcd': 'Sega CD', 'megacd': 'Sega CD',
+					'Sega 32X': 'Sega 32X', 'sega32x': 'Sega 32X', '32X': 'Sega 32X', '32x': 'Sega 32X',
+					'Saturn': 'Saturn', 'saturn': 'Saturn', 'Sega Saturn': 'Saturn', 'segasaturn': 'Saturn',
 					'Dreamcast': 'Dreamcast', 'dreamcast': 'Dreamcast', 'DC': 'Dreamcast', 'dc': 'Dreamcast',
 					// Sony
 					'PS1': 'PS1', 'PSX': 'PS1', 'PlayStation': 'PS1', 'PS': 'PS1', 'playstation': 'PS1', 'ps1': 'PS1', 'psx': 'PS1', 'ps': 'PS1',
-					'PSP': 'PSP', 'psp': 'PSP',
+					'Sony PlayStation': 'PS1', // MUOS catalogue name
+					'PSP': 'PSP', 'psp': 'PSP', 'PlayStation Portable': 'PSP',
 					// NEC
-					'PCE': 'PCE', 'PC Engine': 'PCE', 'TurboGrafx-16': 'PCE', 'TurboGrafx': 'PCE', 'pcengine': 'PCE', 'turbografx': 'PCE', 'pce': 'PCE',
+					'PCE': 'PCE', 'PC Engine': 'PCE', 'TurboGrafx-16': 'PCE', 'TurboGrafx': 'PCE', 'pcengine': 'PCE', 'turbografx': 'PCE', 'pce': 'PCE', 'tg16': 'PCE', 'pcenginecd': 'PCE',
+					'NEC PC Engine - TurboGrafx 16': 'PCE', // MUOS catalogue name
 					// SNK
-					'Neo Geo': 'Neo Geo', 'NEOGEO': 'Neo Geo', 'neogeo': 'Neo Geo', 'NeoGeo': 'Neo Geo',
+					'Neo Geo': 'Neo Geo', 'NEOGEO': 'Neo Geo', 'neogeo': 'Neo Geo', 'NeoGeo': 'Neo Geo', 'ng': 'Neo Geo',
+					'SNK Neo Geo': 'Neo Geo', // MUOS catalogue name
 					'Neo Geo Pocket': 'Neo Geo Pocket', 'NGP': 'Neo Geo Pocket', 'NGPC': 'Neo Geo Pocket', 'neogeopocket': 'Neo Geo Pocket', 'ngp': 'Neo Geo Pocket', 'ngpc': 'Neo Geo Pocket',
+					'SNK Neo Geo Pocket': 'Neo Geo Pocket', // MUOS catalogue name
+					'SNK Neo Geo Pocket Color': 'Neo Geo Pocket', // MUOS catalogue name
 					// Atari
-					'Atari 2600': 'Atari 2600', 'atari2600': 'Atari 2600', 'ATARI': 'Atari 2600', 'Atari': 'Atari 2600',
+					'Atari 2600': 'Atari 2600', 'atari2600': 'Atari 2600', 'ATARI': 'Atari 2600', 'Atari': 'Atari 2600', 'a2600': 'Atari 2600',
 					'Atari 5200': 'Atari 5200', 'atari5200': 'Atari 5200', 'a5200': 'Atari 5200',
 					'Atari 7800': 'Atari 7800', 'atari7800': 'Atari 7800', 'a7800': 'Atari 7800',
 					'Atari Lynx': 'Atari Lynx', 'LYNX': 'Atari Lynx', 'Lynx': 'Atari Lynx', 'atarilynx': 'Atari Lynx', 'lynx': 'Atari Lynx',
 					// Bandai
-					'WonderSwan': 'WonderSwan', 'WS': 'WonderSwan', 'wonderswan': 'WonderSwan', 'ws': 'WonderSwan', 'wsc': 'WonderSwan',
+					'WonderSwan': 'WonderSwan', 'WS': 'WonderSwan', 'wonderswan': 'WonderSwan', 'ws': 'WonderSwan', 'wsc': 'WonderSwan', 'WonderSwan Color': 'WonderSwan',
+					'Bandai WonderSwan': 'WonderSwan', // MUOS catalogue name
+					'Bandai WonderSwan Color': 'WonderSwan', // MUOS catalogue name
 					// Other Consoles
-					'Coleco': 'Coleco', 'coleco': 'Coleco', 'ColecoVision': 'Coleco', 'colecovision': 'Coleco',
+					'Coleco': 'Coleco', 'coleco': 'Coleco', 'ColecoVision': 'Coleco', 'colecovision': 'Coleco', 'cv': 'Coleco',
 					'Intellivision': 'Intellivision', 'intellivision': 'Intellivision', 'INTV': 'Intellivision', 'intv': 'Intellivision',
 					'Vectrex': 'Vectrex', 'vectrex': 'Vectrex',
-					'3DO': '3DO', '3do': '3DO',
+					'GCE Vectrex': 'Vectrex', // MUOS catalogue name
+					'3DO': '3DO', '3do': '3DO', 'panasonic3do': '3DO',
 					// Computers
 					'Amiga': 'Amiga', 'amiga': 'Amiga',
 					'Commodore 64': 'Commodore 64', 'C64': 'Commodore 64', 'c64': 'Commodore 64'
