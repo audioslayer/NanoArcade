@@ -2464,7 +2464,7 @@
 				<button class="btn-3d purple" onclick="showThemeSelector(); toggleMobileMenu();" style="margin-bottom: 10px;">
 					<span class="icon solid fa-palette"></span> Theme
 				</button>
-				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.1</div>
+				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.2</div>
 			</div>
 		</div>
 
@@ -2497,7 +2497,7 @@
 						<li><a href="javascript:void(0);" onclick="showThemeSelector(); return false;"><span class="icon solid fa-palette"></span> Theme</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.1</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.2</div>
 			</div>
 		</section>
 
@@ -5118,8 +5118,8 @@
 				const skipNames = ['gamelist', 'miyoogamelist'];
 
 				for await (const entry of dirHandle.values()) {
-					// Skip hidden files and folders (starting with .), EXCEPT .res/.media (MinUI/NextUI) and .multidisc (multi-disc games)
-					if (entry.name.startsWith('.') && entry.name !== '.res' && entry.name !== '.media' && entry.name !== '.multidisc') continue;
+					// Skip hidden files and folders (starting with .), EXCEPT .res/.media (MinUI/NextUI box art folders)
+					if (entry.name.startsWith('.') && entry.name !== '.res' && entry.name !== '.media') continue;
 
 					if (entry.kind === 'file') {
 						// Skip files without extensions
