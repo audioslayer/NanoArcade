@@ -2464,7 +2464,7 @@
 				<button class="btn-3d purple" onclick="showThemeSelector(); toggleMobileMenu();" style="margin-bottom: 10px;">
 					<span class="icon solid fa-palette"></span> Theme
 				</button>
-				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.4</div>
+				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.5</div>
 			</div>
 		</div>
 
@@ -2497,7 +2497,7 @@
 						<li><a href="javascript:void(0);" onclick="showThemeSelector(); return false;"><span class="icon solid fa-palette"></span> Theme</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.4</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.5</div>
 			</div>
 		</section>
 
@@ -7960,9 +7960,26 @@
 
 				status.textContent = 'Uploading...'; status.style.display = 'block';
 				try {
+					// Determine the base directory for ROMs based on device profile
+					const profile = deviceProfiles[currentDevice];
+					const usesRomsFolder = profile.emoji === '🧅' || profile.isMinUI || profile.isNextUI;
+
+					let baseDir = directoryHandle;
+					if (usesRomsFolder) {
+						// Onion OS, MinUI, NextUI use Roms subfolder
+						try { baseDir = await directoryHandle.getDirectoryHandle('Roms'); }
+						catch {
+							try { baseDir = await directoryHandle.getDirectoryHandle('ROMS'); }
+							catch {
+								try { baseDir = await directoryHandle.getDirectoryHandle('roms'); }
+								catch { baseDir = await directoryHandle.getDirectoryHandle('Roms', { create: true }); }
+							}
+						}
+					}
+
 					let ch;
-					try { ch = await directoryHandle.getDirectoryHandle(consoleName); }
-					catch { ch = await directoryHandle.getDirectoryHandle(consoleName, { create: true }); }
+					try { ch = await baseDir.getDirectoryHandle(consoleName); }
+					catch { ch = await baseDir.getDirectoryHandle(consoleName, { create: true }); }
 
 					for (const item of filesToUpload) {
 						const fh = await ch.getFileHandle(item.cleanName, { create: true });
