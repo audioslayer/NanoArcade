@@ -98,8 +98,8 @@ MinUI fork with enhanced features and 3 resolution tiers:
 - **Triple Source Search** - Box art searched from Libretro Thumbnails, TheGamesDB, and GameFAQs in parallel
 - **Libretro Thumbnails** - 131 systems with thousands of box art images, cached directory listings for instant repeat searches
 - **CORS Proxy Fallback** - Automatic failover across multiple proxies for reliable scraping
-- **Game Info Display** - Rating, Difficulty, and Length shown in game modal
-- **Styled Tooltips** - Hover for detailed breakdowns (votes, verdicts, playtime)
+- **Wikipedia Review Scores** - Metacritic, IGN, and GameSpot scores fetched from Wikipedia (no proxy needed)
+- **Styled Tooltips** - Hover for detailed breakdowns (GameRankings, Famitsu, EGM, NintendoLife)
 
 ### :floppy_disk: Save Manager
 - **Multi-Device Support** - Backup, restore, and delete game saves for RG Nano, Miyoo devices (Onion OS), MinUI, and NextUI
@@ -243,8 +243,9 @@ The app recognizes and displays icons for:
 
 ## Changelog
 
-### v1.8.6 - Libretro Thumbnails + Proxy Fixes
+### v1.8.6 - Libretro Thumbnails + Wikipedia Scores + Proxy Fixes
 - **Libretro Thumbnails Integration** - New box art source with 131 systems and thousands of images from [thumbnails.libretro.com](https://thumbnails.libretro.com/). No API key required. Directory listings are cached per system for instant repeat searches.
+- **Wikipedia Review Scores** - Game info panel now shows Metacritic, IGN, and GameSpot scores from [Wikipedia](https://en.wikipedia.org/) with native CORS support (no proxy needed). Tooltips show additional scores (GameRankings, Famitsu, EGM, NintendoLife). Replaces GameFAQs ratings which are now blocked by Cloudflare.
 - **Smart Search Scoring** - Libretro results ranked by name match quality, USA/World regions preferred, proto/beta versions deprioritized
 - **CORS Proxy Fallback** - All proxy-dependent requests now try multiple CORS proxies (corsproxy.io, codetabs.com, allorigins.win) with automatic failover
 - **jQuery Fix** - Fixed `javascript:void(0)` selector error in sidebar navigation
@@ -367,6 +368,7 @@ The app recognizes and displays icons for:
 
 - UI based on [Hyperspace](https://html5up.net/hyperspace) by HTML5 UP
 - Box art from [Libretro Thumbnails](https://thumbnails.libretro.com/), [TheGamesDB](https://thegamesdb.net/), and [GameFAQs](https://gamefaqs.gamespot.com/)
+- Review scores from [Wikipedia](https://en.wikipedia.org/) (Metacritic, IGN, GameSpot, Famitsu, and more)
 - Console icons included in the `icons` folder
 - Top 25 game lists curated from community rankings
 

@@ -2714,23 +2714,23 @@
 				<div id="gameFaqsInfo" style="display: none; margin-bottom: 1em; padding: 0.75em; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2);">
 					<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5em; text-align: center; font-size: 0.8em;">
 						<div id="gfRatingWrap" style="cursor: help; position: relative;">
-							<div style="color: rgba(255,255,255,0.5); margin-bottom: 0.25em;">Rating</div>
+							<div style="color: rgba(255,255,255,0.5); margin-bottom: 0.25em;">Metacritic</div>
 							<div id="gfRating" style="color: #fbbf24;">
 								<span class="icon solid fa-star"></span> --
 							</div>
 							<div id="gfRatingTooltip" class="gf-tooltip"></div>
 						</div>
 						<div id="gfDifficultyWrap" style="cursor: help; position: relative;">
-							<div style="color: rgba(255,255,255,0.5); margin-bottom: 0.25em;">Difficulty</div>
+							<div style="color: rgba(255,255,255,0.5); margin-bottom: 0.25em;">IGN</div>
 							<div id="gfDifficulty" style="color: #f87171;">
-								<span class="icon solid fa-heartbeat"></span> --
+								<span class="icon solid fa-gamepad"></span> --
 							</div>
 							<div id="gfDifficultyTooltip" class="gf-tooltip"></div>
 						</div>
 						<div id="gfLengthWrap" style="cursor: help; position: relative;">
-							<div style="color: rgba(255,255,255,0.5); margin-bottom: 0.25em;">Length</div>
+							<div style="color: rgba(255,255,255,0.5); margin-bottom: 0.25em;">GameSpot</div>
 							<div id="gfLength" style="color: #34d399;">
-								<span class="icon solid fa-clock"></span> --
+								<span class="icon solid fa-newspaper"></span> --
 							</div>
 							<div id="gfLengthTooltip" class="gf-tooltip"></div>
 						</div>
@@ -6335,7 +6335,7 @@
 				document.getElementById('imageStatus').style.display = 'none';
 				loadGameImage(baseName);
 				updateNextGameButton();
-				// Fetch GameFAQs info (async, non-blocking)
+				// Fetch game info (async, non-blocking)
 				fetchGameFAQsInfo(baseName, gameConsole);
 				// Show/hide saves button and local image rows based on device
 				// Saves supported for RG Nano and Onion OS devices (Miyoo Mini, Miyoo Flip)
@@ -6826,149 +6826,116 @@
 			}
 
 			// Fetch game info (rating, difficulty, length) from GameFAQs
+			// Fetch game review scores from Wikipedia (no proxy needed, CORS supported)
 			async function fetchGameFAQsInfo(gameName, consoleName) {
-				// GameFAQs blocks all CORS proxies - disabled until a working proxy is found
-				return;
 				const infoDiv = document.getElementById('gameFaqsInfo');
 				const ratingEl = document.getElementById('gfRating');
-				const difficultyEl = document.getElementById('gfDifficulty');
-				const lengthEl = document.getElementById('gfLength');
+				const ignEl = document.getElementById('gfDifficulty');
+				const gspotEl = document.getElementById('gfLength');
 				const ratingTooltip = document.getElementById('gfRatingTooltip');
-				const difficultyTooltip = document.getElementById('gfDifficultyTooltip');
-				const lengthTooltip = document.getElementById('gfLengthTooltip');
+				const ignTooltip = document.getElementById('gfDifficultyTooltip');
+				const gspotTooltip = document.getElementById('gfLengthTooltip');
 
 				// Reset and hide while loading
 				infoDiv.style.display = 'none';
 				ratingEl.innerHTML = '<span class="icon solid fa-star"></span> --';
-				difficultyEl.innerHTML = '<span class="icon solid fa-heartbeat"></span> --';
-				lengthEl.innerHTML = '<span class="icon solid fa-clock"></span> --';
+				ignEl.innerHTML = '<span class="icon solid fa-gamepad"></span> --';
+				gspotEl.innerHTML = '<span class="icon solid fa-newspaper"></span> --';
 				ratingTooltip.innerHTML = '';
-				difficultyTooltip.innerHTML = '';
-				lengthTooltip.innerHTML = '';
+				ignTooltip.innerHTML = '';
+				gspotTooltip.innerHTML = '';
 
 				try {
-					// Get platform code
-					const consoleKey = getConsoleKey(consoleName);
-					const platformCode = gameFaqsPlatformMap[consoleKey];
-					const relatedPlatforms = {
-						'gameboy': ['gameboy', 'gbc'],
-						'gbc': ['gbc', 'gameboy'],
-						'nes': ['nes'],
-						'snes': ['snes'],
-						'gba': ['gba'],
-						'genesis': ['genesis'],
-						'n64': ['n64'],
-						'ps': ['ps'],
-						'ds': ['ds']
-					};
-					const allowedPlatforms = platformCode ? (relatedPlatforms[platformCode] || [platformCode]) : null;
+					const wikiApi = 'https://en.wikipedia.org/w/api.php';
 
-					// Search for the game
-					const searchUrl = `https://gamefaqs.gamespot.com/ajax/home_game_search?term=${encodeURIComponent(gameName)}`;
-					const response = await fetchWithCorsProxy(searchUrl);
-					if (!response.ok) return;
+					// Search Wikipedia for the game
+					const searchUrl = `${wikiApi}?action=query&list=search&srsearch=${encodeURIComponent(gameName + ' video game')}&srlimit=3&format=json&origin=*`;
+					const searchResp = await fetch(searchUrl);
+					const searchData = await searchResp.json();
+					if (!searchData.query?.search?.length) return;
 
-					const data = await response.json();
-					if (!Array.isArray(data)) return;
+					// Get wikitext of the top result
+					const title = searchData.query.search[0].title;
+					const parseUrl = `${wikiApi}?action=parse&page=${encodeURIComponent(title)}&prop=wikitext&format=json&origin=*`;
+					const parseResp = await fetch(parseUrl);
+					const parseData = await parseResp.json();
+					if (!parseData.parse?.wikitext?.['*']) return;
 
-					// Find best matching game
-					const searchLower = gameName.toLowerCase().replace(/[^a-z0-9]/g, '');
-					let bestMatch = null;
-					let bestScore = 0;
+					const wt = parseData.parse.wikitext['*'];
 
-					for (const game of data) {
-						if (!game.url || !game.platform_url) continue;
-						const platformMatch = allowedPlatforms ? allowedPlatforms.includes(game.platform_url) : true;
-						if (!platformMatch) continue;
+					// Parse Metacritic score
+					let mc = wt.match(/\|\s*MC\s*=\s*(\d+)/i);
+					if (!mc) mc = wt.match(/\|\s*mc\s*=\s*(\d+)/i);
+					if (!mc) mc = wt.match(/Metacritic[^\d]{0,30}?(\d{2,3})\s*(?:\/\s*100|%)/i);
 
-						const gameNameLower = (game.game_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-						let score = 0;
-						if (gameNameLower === searchLower) score = 100;
-						else if (gameNameLower.includes(searchLower)) score = 50;
-						else if (searchLower.includes(gameNameLower)) score = 25;
-						if (game.platform_url === platformCode) score += 10;
+					// Parse IGN score
+					let ign = wt.match(/\|\s*IGN\s*=\s*([\d.]+)\s*\/\s*10/i);
+					if (!ign) ign = wt.match(/\[\[IGN\]\][^\d]{0,20}?([\d.]+)\s*\/\s*10/i);
 
-						if (score > bestScore) {
-							bestScore = score;
-							bestMatch = game;
-						}
+					// Parse GameSpot score
+					let gs = wt.match(/\|\s*GSpot\s*=\s*([\d.]+)\s*\/\s*10/i);
+					if (!gs) gs = wt.match(/\|\s*gspot\s*=\s*([\d.]+)\s*\/\s*10/i);
+					if (!gs) gs = wt.match(/\[\[GameSpot\]\][^\d]{0,20}?([\d.]+)\s*\/\s*10/i);
+
+					// Parse GameRankings aggregate
+					let gr = wt.match(/\|\s*GR\s*=\s*([\d.]+)%/i);
+
+					// Parse Famitsu score
+					let fam = wt.match(/\|\s*Fam\s*=\s*(\d+)\s*\/\s*40/i);
+					if (!fam) fam = wt.match(/\|\s*fam\s*=\s*(\d+)\s*\/\s*40/i);
+
+					// Parse EGM score
+					let egm = wt.match(/\|\s*EGM\s*=\s*([\d.]+)\s*\/\s*10/i);
+					if (!egm) egm = wt.match(/\|\s*egm\s*=\s*([\d.]+)\s*\/\s*10/i);
+
+					// Parse NintendoLife score
+					let nlife = wt.match(/\|\s*NLife\s*=\s*([\d.]+)\s*\/\s*10/i);
+					if (!nlife) nlife = wt.match(/\|\s*nlife\s*=\s*([\d.]+)\s*\/\s*10/i);
+
+					// Need at least one score to show the panel
+					if (!mc && !ign && !gs && !gr && !fam && !egm && !nlife) return;
+
+					infoDiv.style.display = 'block';
+
+					// Metacritic column
+					if (mc) {
+						const score = mc[1];
+						ratingEl.innerHTML = `<span class="icon solid fa-star"></span> ${score}/100`;
+						let tip = `<div class="gf-tooltip-row"><span>Metacritic:</span><span>${score}/100</span></div>`;
+						if (gr) tip += `<div class="gf-tooltip-row"><span>GameRankings:</span><span>${gr[1]}%</span></div>`;
+						if (fam) tip += `<div class="gf-tooltip-row"><span>Famitsu:</span><span>${fam[1]}/40</span></div>`;
+						ratingTooltip.innerHTML = tip;
+					} else if (gr) {
+						ratingEl.innerHTML = `<span class="icon solid fa-star"></span> ${gr[1]}%`;
+						ratingTooltip.innerHTML = `<div class="gf-tooltip-row"><span>GameRankings:</span><span>${gr[1]}%</span></div>`;
 					}
 
-					if (!bestMatch) return;
-
-					// Fetch the game page
-					const gamePageUrl = `https://gamefaqs.gamespot.com${bestMatch.url}`;
-					const gameResponse = await fetchWithCorsProxy(gamePageUrl);
-					if (!gameResponse.ok) return;
-
-					const html = await gameResponse.text();
-
-					// Parse rating with count
-					let rating = null;
-					let ratingCount = null;
-					let ratingLabel = null;
-					// Try "4.23 stars from 3375" pattern
-					let ratingMatch = html.match(/(\d+\.\d+)\s*stars?\s*from\s*(\d+)/i);
-					if (ratingMatch) {
-						rating = parseFloat(ratingMatch[1]).toFixed(2);
-						ratingCount = ratingMatch[2];
-					}
-					// Try text rating like "Great (3375 ratings)"
-					const labelMatch = html.match(/(Outstanding|Great|Good|Average|Bad|Terrible)\s*\((\d+)\s*ratings?\)/i);
-					if (labelMatch) {
-						ratingLabel = labelMatch[1];
-						if (!ratingCount) ratingCount = labelMatch[2];
+					// IGN column
+					if (ign) {
+						ignEl.innerHTML = `<span class="icon solid fa-gamepad"></span> ${ign[1]}/10`;
+						let tip = `<div class="gf-tooltip-row"><span>IGN:</span><span>${ign[1]}/10</span></div>`;
+						if (egm) tip += `<div class="gf-tooltip-row"><span>EGM:</span><span>${egm[1]}/10</span></div>`;
+						if (nlife) tip += `<div class="gf-tooltip-row"><span>NintendoLife:</span><span>${nlife[1]}/10</span></div>`;
+						ignTooltip.innerHTML = tip;
+					} else if (egm) {
+						ignEl.innerHTML = `<span class="icon solid fa-gamepad"></span> ${egm[1]}/10`;
+						ignTooltip.innerHTML = `<div class="gf-tooltip-row"><span>EGM:</span><span>${egm[1]}/10</span></div>`;
 					}
 
-					// Parse difficulty with count
-					let difficulty = null;
-					let difficultyCount = null;
-					const diffMatch = html.match(/(Very Easy|Easy|Just Right|Tough|Very Hard|Unforgiving)\s*\((\d+)\)/i);
-					if (diffMatch) {
-						difficulty = diffMatch[1];
-						difficultyCount = diffMatch[2];
+					// GameSpot column
+					if (gs) {
+						gspotEl.innerHTML = `<span class="icon solid fa-newspaper"></span> ${gs[1]}/10`;
+						let tip = `<div class="gf-tooltip-row"><span>GameSpot:</span><span>${gs[1]}/10</span></div>`;
+						if (fam && !mc) tip += `<div class="gf-tooltip-row"><span>Famitsu:</span><span>${fam[1]}/40</span></div>`;
+						gspotTooltip.innerHTML = tip;
+					} else if (fam && !mc) {
+						gspotEl.innerHTML = `<span class="icon solid fa-newspaper"></span> ${fam[1]}/40`;
+						gspotTooltip.innerHTML = `<div class="gf-tooltip-row"><span>Famitsu:</span><span>${fam[1]}/40</span></div>`;
 					}
 
-					// Parse length with count
-					let length = null;
-					let lengthCount = null;
-					const lengthMatch = html.match(/(\d+(?:\.\d+)?)\s*Hours?\s*\((\d+)\)/i);
-					if (lengthMatch) {
-						length = lengthMatch[1] + 'h';
-						lengthCount = lengthMatch[2];
-					}
-
-					// Update UI if we found any data
-					if (rating || ratingLabel || difficulty || length) {
-						infoDiv.style.display = 'block';
-
-						// Rating
-						if (rating || ratingLabel) {
-							const displayRating = rating || ratingLabel;
-							ratingEl.innerHTML = `<span class="icon solid fa-star"></span> ${displayRating}`;
-							let tooltipHtml = '';
-							if (rating) tooltipHtml += `<div class="gf-tooltip-row"><span>Score:</span><span>${rating} / 5</span></div>`;
-							if (ratingLabel) tooltipHtml += `<div class="gf-tooltip-row"><span>Verdict:</span><span>${ratingLabel}</span></div>`;
-							if (ratingCount) tooltipHtml += `<div class="gf-tooltip-row"><span>Votes:</span><span>${parseInt(ratingCount).toLocaleString()}</span></div>`;
-							ratingTooltip.innerHTML = tooltipHtml;
-						}
-
-						// Difficulty
-						if (difficulty) {
-							difficultyEl.innerHTML = `<span class="icon solid fa-heartbeat"></span> ${difficulty}`;
-							let tooltipHtml = `<div class="gf-tooltip-row"><span>Difficulty:</span><span>${difficulty}</span></div>`;
-							if (difficultyCount) tooltipHtml += `<div class="gf-tooltip-row"><span>Votes:</span><span>${parseInt(difficultyCount).toLocaleString()}</span></div>`;
-							difficultyTooltip.innerHTML = tooltipHtml;
-						}
-
-						// Length
-						if (length) {
-							lengthEl.innerHTML = `<span class="icon solid fa-clock"></span> ${length}`;
-							let tooltipHtml = `<div class="gf-tooltip-row"><span>Main Story:</span><span>${length}</span></div>`;
-							if (lengthCount) tooltipHtml += `<div class="gf-tooltip-row"><span>Votes:</span><span>${parseInt(lengthCount).toLocaleString()}</span></div>`;
-							lengthTooltip.innerHTML = tooltipHtml;
-						}
-					}
+					// Update labels from Wikipedia article title
+					const srcLink = `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`;
+					infoDiv.title = `Scores from Wikipedia: ${title}`;
 				} catch (e) {
 					// Silently fail - info is optional
 				}
