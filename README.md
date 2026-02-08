@@ -94,8 +94,10 @@ MinUI fork with enhanced features and 3 resolution tiers:
 - **7 Color Themes** - Choose from Blue, Purple, Green, Red, Cyan, Orange, Pink
 - **Persistent Selection** - Theme saves via localStorage
 
-### :video_game: GameFAQs Integration
-- **Dual Search** - Box art searched from both TheGamesDB and GameFAQs simultaneously
+### :video_game: Box Art Scraping
+- **Triple Source Search** - Box art searched from Libretro Thumbnails, TheGamesDB, and GameFAQs in parallel
+- **Libretro Thumbnails** - 131 systems with thousands of box art images, cached directory listings for instant repeat searches
+- **CORS Proxy Fallback** - Automatic failover across multiple proxies for reliable scraping
 - **Game Info Display** - Rating, Difficulty, and Length shown in game modal
 - **Styled Tooltips** - Hover for detailed breakdowns (votes, verdicts, playtime)
 
@@ -113,7 +115,7 @@ MinUI fork with enhanced features and 3 resolution tiers:
 - **Supported Consoles**: GB, GBC, GBA, NES, SNES, N64, Genesis, Game Gear, Master System, PS1, PC Engine, Neo Geo, Neo Geo Pocket, Atari 2600, Atari Lynx, WonderSwan
 
 ### :framed_picture: Box Art Management
-- **Dual Image Search** - Search TheGamesDB and GameFAQs for box art
+- **Triple Image Search** - Search Libretro Thumbnails, TheGamesDB, and GameFAQs for box art
 - **Upload Local Images** - Drag & drop or browse for local artwork
 - **URL Import** - Paste image URLs directly with automatic download
 - **Smart Processing** - Auto-resize, format conversion, and optimization
@@ -241,6 +243,13 @@ The app recognizes and displays icons for:
 
 ## Changelog
 
+### v1.8.6 - Libretro Thumbnails + Proxy Fixes
+- **Libretro Thumbnails Integration** - New box art source with 131 systems and thousands of images from [thumbnails.libretro.com](https://thumbnails.libretro.com/). No API key required. Directory listings are cached per system for instant repeat searches.
+- **Smart Search Scoring** - Libretro results ranked by name match quality, USA/World regions preferred, proto/beta versions deprioritized
+- **CORS Proxy Fallback** - All proxy-dependent requests now try multiple CORS proxies (corsproxy.io, codetabs.com, allorigins.win) with automatic failover
+- **jQuery Fix** - Fixed `javascript:void(0)` selector error in sidebar navigation
+- **Parallel Search** - Libretro and TheGamesDB searched simultaneously for faster results
+
 ### v1.7 - OS-First Revolution
 
 :star2: **Operating System-Based Organization** - Complete restructure from device-specific selection to OS-based workflow (MustardOS, Onion OS, DrUm78, MinUI, NextUI). This matches the real-world usage pattern where users choose firmware first, then configure for their specific device.
@@ -357,7 +366,7 @@ The app recognizes and displays icons for:
 ## Credits
 
 - UI based on [Hyperspace](https://html5up.net/hyperspace) by HTML5 UP
-- Box art from [TheGamesDB](https://thegamesdb.net/) and [GameFAQs](https://gamefaqs.gamespot.com/)
+- Box art from [Libretro Thumbnails](https://thumbnails.libretro.com/), [TheGamesDB](https://thegamesdb.net/), and [GameFAQs](https://gamefaqs.gamespot.com/)
 - Console icons included in the `icons` folder
 - Top 25 game lists curated from community rankings
 

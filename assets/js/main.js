@@ -71,8 +71,13 @@
 				.each(function() {
 
 					var	$this = $(this),
-						id = $this.attr('href'),
-						$section = $(id);
+						id = $this.attr('href');
+
+					// Not a hash link? Bail.
+						if (!id || id.charAt(0) != '#')
+							return;
+
+					var $section = $(id);
 
 					// No section for this link? Bail.
 						if ($section.length < 1)

@@ -2464,7 +2464,7 @@
 				<button class="btn-3d purple" onclick="showThemeSelector(); toggleMobileMenu();" style="margin-bottom: 10px;">
 					<span class="icon solid fa-palette"></span> Theme
 				</button>
-				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.5</div>
+				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.6</div>
 			</div>
 		</div>
 
@@ -2497,7 +2497,7 @@
 						<li><a href="javascript:void(0);" onclick="showThemeSelector(); return false;"><span class="icon solid fa-palette"></span> Theme</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.5</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.6</div>
 			</div>
 		</section>
 
@@ -6482,6 +6482,25 @@
 				document.getElementById('imagePicker').classList.remove('active');
 			}
 
+			// Shared CORS proxy helper with fallback
+			async function fetchWithCorsProxy(url, options = {}) {
+				const proxies = [
+					`https://corsproxy.io/?${encodeURIComponent(url)}`,
+					`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+					`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+				];
+				for (const proxyUrl of proxies) {
+					try {
+						const controller = new AbortController();
+						const timeout = setTimeout(() => controller.abort(), 8000);
+						const response = await fetch(proxyUrl, { ...options, signal: controller.signal });
+						clearTimeout(timeout);
+						if (response.ok) return response;
+					} catch (e) { /* try next proxy */ }
+				}
+				return new Response(null, { status: 503, statusText: 'All proxies failed' });
+			}
+
 			async function searchImagesInPicker() {
 				const q = document.getElementById('pickerSearchQuery').value.trim();
 				if (!q) return;
@@ -6504,21 +6523,21 @@
 					const consoleName = gameConsole || currentConsole;
 
 					// Search all sources in parallel with cleaned query
-					const [gamesDbResults, gameFaqsResults, coverProjectResults] = await Promise.allSettled([
+					const [libretroResults, gamesDbResults, gameFaqsResults] = await Promise.allSettled([
+						searchLibretro(searchQuery, consoleName),
 						searchTheGamesDB(searchQuery, parser),
-						searchGameFAQs(searchQuery, parser, consoleName),
-						searchTheCoverProject(searchQuery, parser)
+						searchGameFAQs(searchQuery, parser, consoleName)
 					]);
 
-					// Combine results from all sources
+					// Combine results - Libretro first (fastest + most reliable)
+					if (libretroResults.status === 'fulfilled') {
+						images.push(...libretroResults.value);
+					}
 					if (gamesDbResults.status === 'fulfilled') {
 						images.push(...gamesDbResults.value);
 					}
 					if (gameFaqsResults.status === 'fulfilled') {
 						images.push(...gameFaqsResults.value);
-					}
-					if (coverProjectResults.status === 'fulfilled') {
-						images.push(...coverProjectResults.value);
 					}
 
 					if (images.length === 0) {
@@ -6542,7 +6561,7 @@
 			async function searchTheGamesDB(q, parser) {
 				const images = [];
 				const searchUrl = `https://thegamesdb.net/search.php?name=${encodeURIComponent(q)}`;
-				const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(searchUrl)}`);
+				const response = await fetchWithCorsProxy(searchUrl);
 
 				if (!response.ok) return images;
 
@@ -6570,7 +6589,7 @@
 				for (const gameId of uniqueIds.slice(0, 3)) {
 					try {
 						const gameUrl = `https://thegamesdb.net/game.php?id=${gameId}`;
-						const gameResponse = await fetch(`https://corsproxy.io/?${encodeURIComponent(gameUrl)}`);
+						const gameResponse = await fetchWithCorsProxy(gameUrl);
 						if (gameResponse.ok) {
 							const gameHtml = await gameResponse.text();
 							const gameDoc = parser.parseFromString(gameHtml, 'text/html');
@@ -6594,8 +6613,86 @@
 
 			async function searchTheCoverProject(q, parser) {
 				// The Cover Project's CDN blocks CORS proxies, so we can't reliably fetch their images
-				// Return empty array - TheGamesDB will be the primary source
 				return [];
+			}
+
+			// Libretro Thumbnails - free box art hosted on thumbnails.libretro.com
+			const libretroSystemMap = {
+				'GB': 'Nintendo - Game Boy', 'GBC': 'Nintendo - Game Boy Color',
+				'GBA': 'Nintendo - Game Boy Advance', 'NDS': 'Nintendo - Nintendo DS',
+				'NES': 'Nintendo - Nintendo Entertainment System',
+				'SNES': 'Nintendo - Super Nintendo Entertainment System',
+				'N64': 'Nintendo - Nintendo 64', 'Virtual Boy': 'Nintendo - Virtual Boy',
+				'Genesis': 'Sega - Mega Drive - Genesis', 'Game Gear': 'Sega - Game Gear',
+				'Master System': 'Sega - Master System - Mark III',
+				'Sega CD': 'Sega - Mega-CD - Sega CD', 'Sega 32X': 'Sega - 32X',
+				'Saturn': 'Sega - Saturn', 'Dreamcast': 'Sega - Dreamcast',
+				'PS1': 'Sony - PlayStation', 'PSP': 'Sony - PlayStation Portable',
+				'PCE': 'NEC - PC Engine - TurboGrafx 16',
+				'Neo Geo': 'SNK - Neo Geo', 'Neo Geo Pocket': 'SNK - Neo Geo Pocket Color',
+				'Atari 2600': 'Atari - 2600', 'Atari 5200': 'Atari - 5200',
+				'Atari 7800': 'Atari - 7800', 'Atari Lynx': 'Atari - Lynx',
+				'WonderSwan': 'Bandai - WonderSwan',
+				'Coleco': 'Coleco - ColecoVision', 'Intellivision': 'Mattel - Intellivision',
+				'Vectrex': 'GCE - Vectrex', '3DO': 'The 3DO Company - 3DO',
+				'Amiga': 'Commodore - Amiga', 'Commodore 64': 'Commodore - 64',
+				'Arcade': 'MAME'
+			};
+			const _libretroListCache = {};
+
+			async function searchLibretro(q, consoleName) {
+				const images = [];
+				const consoleKey = getConsoleKey(consoleName);
+				const libretroSystem = libretroSystemMap[consoleKey];
+				if (!libretroSystem) return images;
+
+				const baseUrl = 'https://thumbnails.libretro.com';
+				const listUrl = `${baseUrl}/${encodeURIComponent(libretroSystem)}/Named_Boxarts/`;
+
+				// Cache directory listings to avoid re-fetching
+				let fileNames = _libretroListCache[libretroSystem];
+				if (!fileNames) {
+					try {
+						const response = await fetchWithCorsProxy(listUrl);
+						if (!response.ok) return images;
+						const html = await response.text();
+						const parser = new DOMParser();
+						const doc = parser.parseFromString(html, 'text/html');
+						fileNames = Array.from(doc.querySelectorAll('a[href$=".png"]'))
+							.map(a => a.textContent.trim());
+						_libretroListCache[libretroSystem] = fileNames;
+					} catch (e) { return images; }
+				}
+
+				// Search: match game name against filenames (strip region/version info for matching)
+				const searchLower = q.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+				const searchWords = searchLower.split(/\s+/).filter(Boolean);
+
+				const scored = fileNames.map(fn => {
+					const namePart = fn.replace(/\s*\(.*$/, '').toLowerCase().replace(/[^a-z0-9 ]/g, '');
+					let score = 0;
+					if (namePart === searchLower) score = 100;
+					else if (namePart.includes(searchLower)) score = 60;
+					else {
+						const matchCount = searchWords.filter(w => namePart.includes(w)).length;
+						if (matchCount === searchWords.length) score = 50;
+						else if (matchCount > 0) score = matchCount * 10;
+					}
+					// Prefer USA/Europe regions
+					if (fn.includes('(USA') || fn.includes('(World')) score += 5;
+					if (fn.includes('(Europe')) score += 3;
+					// Penalize proto/beta
+					if (fn.includes('(Proto)') || fn.includes('(Beta)')) score -= 10;
+					return { fn, score };
+				}).filter(s => s.score > 0)
+				  .sort((a, b) => b.score - a.score)
+				  .slice(0, 15);
+
+				for (const { fn } of scored) {
+					const imgUrl = `${baseUrl}/${encodeURIComponent(libretroSystem)}/Named_Boxarts/${encodeURIComponent(fn)}`;
+					images.push({ thumb: imgUrl, full: imgUrl });
+				}
+				return images;
 			}
 
 			// GameFAQs platform code mapping
@@ -6627,7 +6724,8 @@
 			};
 
 			async function searchGameFAQs(q, parser, consoleName) {
-				const images = [];
+				// GameFAQs blocks all CORS proxies - disabled until a working proxy is found
+				return [];
 
 				// Get platform code for GameFAQs
 				const consoleKey = getConsoleKey(consoleName);
@@ -6650,7 +6748,7 @@
 				try {
 					// Use GameFAQs JSON search API
 					const searchUrl = `https://gamefaqs.gamespot.com/ajax/home_game_search?term=${encodeURIComponent(q)}`;
-					const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(searchUrl)}`);
+					const response = await fetchWithCorsProxy(searchUrl);
 					if (!response.ok) return images;
 
 					const data = await response.json();
@@ -6699,7 +6797,7 @@
 						try {
 							// Go directly to the /boxes page for box art
 							const boxesPageUrl = `https://gamefaqs.gamespot.com${gameUrl}/boxes`;
-							const boxesResponse = await fetch(`https://corsproxy.io/?${encodeURIComponent(boxesPageUrl)}`);
+							const boxesResponse = await fetchWithCorsProxy(boxesPageUrl);
 							if (!boxesResponse.ok) continue;
 
 							const boxesHtml = await boxesResponse.text();
@@ -6729,6 +6827,8 @@
 
 			// Fetch game info (rating, difficulty, length) from GameFAQs
 			async function fetchGameFAQsInfo(gameName, consoleName) {
+				// GameFAQs blocks all CORS proxies - disabled until a working proxy is found
+				return;
 				const infoDiv = document.getElementById('gameFaqsInfo');
 				const ratingEl = document.getElementById('gfRating');
 				const difficultyEl = document.getElementById('gfDifficulty');
@@ -6765,7 +6865,7 @@
 
 					// Search for the game
 					const searchUrl = `https://gamefaqs.gamespot.com/ajax/home_game_search?term=${encodeURIComponent(gameName)}`;
-					const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(searchUrl)}`);
+					const response = await fetchWithCorsProxy(searchUrl);
 					if (!response.ok) return;
 
 					const data = await response.json();
@@ -6798,7 +6898,7 @@
 
 					// Fetch the game page
 					const gamePageUrl = `https://gamefaqs.gamespot.com${bestMatch.url}`;
-					const gameResponse = await fetch(`https://corsproxy.io/?${encodeURIComponent(gamePageUrl)}`);
+					const gameResponse = await fetchWithCorsProxy(gamePageUrl);
 					if (!gameResponse.ok) return;
 
 					const html = await gameResponse.text();
@@ -7238,37 +7338,17 @@
 				if (!url) { status.className = 'status-msg error'; status.textContent = 'Enter a URL'; return; }
 				status.textContent = 'Downloading...'; status.style.display = 'block'; status.className = 'status-msg';
 
-				// List of CORS proxies to try (fastest first)
-				const proxies = [
-					`https://corsproxy.io/?${encodeURIComponent(url)}`,
-					`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-					`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
-				];
-
-				// Add timeout for fetch (10 seconds per attempt)
-				const controller = new AbortController();
-				let timeout;
-
-				for (let i = 0; i < proxies.length; i++) {
-					try {
-						timeout = setTimeout(() => controller.abort(), 10000);
-
-						const r = await fetch(proxies[i], { signal: controller.signal });
-						clearTimeout(timeout);
-
-						if (r.ok) {
-							await processAndSaveImage(await r.blob());
-							return; // Success!
-						}
-					} catch (e) {
-						clearTimeout(timeout);
-						// If this was the last proxy, show error
-						if (i === proxies.length - 1) {
-							status.className = 'status-msg error';
-							status.textContent = e.name === 'AbortError' ? 'Download timed out' : 'Error. Try Local instead.';
-						}
-						// Otherwise continue to next proxy
+				try {
+					const r = await fetchWithCorsProxy(url);
+					if (r.ok) {
+						await processAndSaveImage(await r.blob());
+						return;
 					}
+					status.className = 'status-msg error';
+					status.textContent = 'Error. Try Local instead.';
+				} catch (e) {
+					status.className = 'status-msg error';
+					status.textContent = 'Error. Try Local instead.';
 				}
 			}
 
