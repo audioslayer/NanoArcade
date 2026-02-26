@@ -439,6 +439,47 @@
 				background: rgba(245, 158, 11, 0.1);
 			}
 
+			/* ── Zoom slider ── */
+			.zoom-slider {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 80px;
+				height: 4px;
+				border-radius: 2px;
+				background: rgba(255,255,255,0.12);
+				outline: none;
+				cursor: pointer;
+				vertical-align: middle;
+			}
+			.zoom-slider::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				width: 14px;
+				height: 14px;
+				border-radius: 50%;
+				background: #06d6d6;
+				box-shadow: 0 0 8px rgba(6,214,214,0.7), 0 2px 0 #047a7a;
+				cursor: pointer;
+				transition: transform 0.1s, box-shadow 0.1s;
+			}
+			.zoom-slider::-webkit-slider-thumb:hover {
+				transform: scale(1.2);
+				box-shadow: 0 0 14px rgba(6,214,214,0.9), 0 2px 0 #047a7a;
+			}
+			.zoom-slider::-moz-range-thumb {
+				width: 14px;
+				height: 14px;
+				border-radius: 50%;
+				background: #06d6d6;
+				border: none;
+				box-shadow: 0 0 8px rgba(6,214,214,0.7);
+				cursor: pointer;
+			}
+			.zoom-slider::-webkit-slider-runnable-track {
+				height: 4px;
+				border-radius: 2px;
+				background: rgba(255,255,255,0.12);
+			}
+
 			/* ── Global custom scrollbars ── */
 			::-webkit-scrollbar {
 				width: 5px;
@@ -2647,12 +2688,14 @@
 								<option value="recent">Recently Added</option>
 							</select>
 						</div>
-						<div id="gridZoomControls" style="display:flex; align-items:center; gap:0.5em;" title="Zoom">
-							<span style="font-size:0.75rem; opacity:0.5;">🔍</span>
-							<input type="range" id="gridZoomSlider" min="2" max="12" step="1" value="8"
-								oninput="setGridCols(13 - parseInt(this.value))"
-								style="width:80px; accent-color:#06d6d6; cursor:pointer; vertical-align:middle;" value="5">
-							<span style="font-size:1rem; opacity:0.5;">🔍</span>
+						<div id="gridZoomControls" title="Zoom" style="display:inline-flex; align-items:center; background:#1e3a5f; border:2px solid #0f2744; border-radius:0.75rem; box-shadow:0 4px 0 #0f2744; transform:skew(-10deg); padding:6px 14px; gap:0.6em; cursor:default;">
+							<span style="transform:skew(10deg); display:flex; align-items:center; gap:0.6em;">
+								<i class="fas fa-search-minus" style="font-size:0.65em; opacity:0.5; color:#06d6d6;"></i>
+								<input type="range" id="gridZoomSlider" min="2" max="12" step="1"
+									oninput="setGridCols(13 - parseInt(this.value))"
+									class="zoom-slider">
+								<i class="fas fa-search-plus" style="font-size:0.65em; opacity:0.5; color:#06d6d6;"></i>
+							</span>
 						</div>
 						<button class="btn-3d small purple" id="autoScrapeBtn" onclick="autoScrapeAllArt()" style="display:none;" title="Auto-scrape box art for all games missing art in this console">
 							🖼️ Auto-Scrape All Art
