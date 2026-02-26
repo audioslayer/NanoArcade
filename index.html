@@ -439,6 +439,31 @@
 				background: rgba(245, 158, 11, 0.1);
 			}
 
+			/* ── Global custom scrollbars ── */
+			::-webkit-scrollbar {
+				width: 5px;
+				height: 5px;
+			}
+			::-webkit-scrollbar-track {
+				background: rgba(255,255,255,0.03);
+				border-radius: 10px;
+			}
+			::-webkit-scrollbar-thumb {
+				background: rgba(6, 214, 214, 0.35);
+				border-radius: 10px;
+				transition: background 0.2s;
+			}
+			::-webkit-scrollbar-thumb:hover {
+				background: rgba(6, 214, 214, 0.7);
+			}
+			::-webkit-scrollbar-corner {
+				background: transparent;
+			}
+			* {
+				scrollbar-width: thin;
+				scrollbar-color: rgba(6, 214, 214, 0.35) rgba(255,255,255,0.03);
+			}
+
 			/* Top 25 scrollbar */
 			#top25List::-webkit-scrollbar {
 				width: 8px;
@@ -5872,23 +5897,13 @@
 
 			function applyConsoleAccent(consoleName) {
 				const color = getConsoleAccentColor(consoleName);
-				const headerEl = document.querySelector('#games .console-header');
-				if (headerEl) {
-					headerEl.style.borderLeft = `4px solid ${color}`;
-					headerEl.style.paddingLeft = '14px';
-				}
 				const iconEl = document.getElementById('currentConsoleIcon');
 				if (iconEl) {
-					iconEl.style.filter = `drop-shadow(0 0 8px ${color}80)`;
+					iconEl.style.filter = `drop-shadow(0 0 10px ${color}99)`;
 				}
 			}
 
 			function resetConsoleAccent() {
-				const headerEl = document.querySelector('#games .console-header');
-				if (headerEl) {
-					headerEl.style.borderLeft = '';
-					headerEl.style.paddingLeft = '';
-				}
 				const iconEl = document.getElementById('currentConsoleIcon');
 				if (iconEl) iconEl.style.filter = '';
 			}
