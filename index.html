@@ -444,12 +444,19 @@
 				-webkit-appearance: none;
 				appearance: none;
 				width: 80px;
-				height: 4px;
-				border-radius: 2px;
-				background: rgba(255,255,255,0.12);
+				height: 14px;
+				background: transparent;
 				outline: none;
 				cursor: pointer;
-				vertical-align: middle;
+				display: block;
+				margin: 0;
+				padding: 0;
+			}
+			.zoom-slider::-webkit-slider-runnable-track {
+				height: 4px;
+				border-radius: 2px;
+				background: rgba(255,255,255,0.2);
+				margin-top: 0;
 			}
 			.zoom-slider::-webkit-slider-thumb {
 				-webkit-appearance: none;
@@ -457,13 +464,19 @@
 				height: 14px;
 				border-radius: 50%;
 				background: #06d6d6;
-				box-shadow: 0 0 8px rgba(6,214,214,0.7), 0 2px 0 #047a7a;
+				box-shadow: 0 0 8px rgba(6,214,214,0.8);
 				cursor: pointer;
+				margin-top: -5px;
 				transition: transform 0.1s, box-shadow 0.1s;
 			}
 			.zoom-slider::-webkit-slider-thumb:hover {
-				transform: scale(1.2);
-				box-shadow: 0 0 14px rgba(6,214,214,0.9), 0 2px 0 #047a7a;
+				transform: scale(1.25);
+				box-shadow: 0 0 14px rgba(6,214,214,1);
+			}
+			.zoom-slider::-moz-range-track {
+				height: 4px;
+				border-radius: 2px;
+				background: rgba(255,255,255,0.2);
 			}
 			.zoom-slider::-moz-range-thumb {
 				width: 14px;
@@ -471,13 +484,8 @@
 				border-radius: 50%;
 				background: #06d6d6;
 				border: none;
-				box-shadow: 0 0 8px rgba(6,214,214,0.7);
+				box-shadow: 0 0 8px rgba(6,214,214,0.8);
 				cursor: pointer;
-			}
-			.zoom-slider::-webkit-slider-runnable-track {
-				height: 4px;
-				border-radius: 2px;
-				background: rgba(255,255,255,0.12);
 			}
 
 			/* ── Global custom scrollbars ── */
@@ -2688,7 +2696,7 @@
 								<option value="recent">Recently Added</option>
 							</select>
 						</div>
-						<div id="gridZoomControls" title="Zoom" style="display:inline-flex; align-items:center; background:#1e3a5f; border:2px solid #0f2744; border-radius:0.75rem; box-shadow:0 4px 0 #0f2744; transform:skew(-10deg); padding:6px 14px; gap:0.6em; cursor:default;">
+						<div id="gridZoomControls" title="Zoom" style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.12); border:2px solid rgba(255,255,255,0.08); border-radius:0.75rem; box-shadow:0 4px 0 rgba(0,0,0,0.3); transform:skew(-10deg); padding:6px 14px; gap:0.6em; cursor:default; backdrop-filter:blur(4px);">
 							<span style="transform:skew(10deg); display:flex; align-items:center; gap:0.6em;">
 								<i class="fas fa-search-minus" style="font-size:0.65em; opacity:0.5; color:#06d6d6;"></i>
 								<input type="range" id="gridZoomSlider" min="2" max="12" step="1"
