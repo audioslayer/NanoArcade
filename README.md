@@ -12,6 +12,21 @@ Or download this repository for offline use.
 
 ---
 
+## 🎮 What's New in v2.0
+
+**Mass Auto-Scraper** — The biggest art update yet. Click **🖼️ Auto-Scrape All Art** in the game toolbar to automatically find and save box art for every game in the current console that's missing artwork.
+
+- Uses the libretro thumbnail database (thumbnails.libretro.com) — the same source powering the single-game search
+- Live progress modal: each game shows ✅ found or ❌ not found in real-time
+- Cleans ROM filenames (strips region tags, revision codes, etc.) before searching for best match
+- Correctly saves art to the right folder for your OS: MustardOS `box/`, MinUI `.res/`, NextUI `.media/`, Onion OS `Imgs/`, etc.
+- Final summary shows "X of Y games scraped"
+- Powered by CORS proxy fallback chain — works from the browser, no install needed
+
+**Version bumped to 2.0** — manifest.json and in-app footer updated.
+
+---
+
 ## :joystick: What's New in v1.7
 
 **OS-First Approach** - Instead of selecting individual devices, NanoArcade now organizes by **operating system** (MustardOS, Onion OS, DrUm78, MinUI, NextUI), with resolution tiers optimized for each OS's supported devices. This provides a more intuitive workflow matching how users actually configure their handhelds.

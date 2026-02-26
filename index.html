@@ -2464,7 +2464,7 @@
 				<button class="btn-3d purple" onclick="showThemeSelector(); toggleMobileMenu();" style="margin-bottom: 10px;">
 					<span class="icon solid fa-palette"></span> Theme
 				</button>
-				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.6</div>
+				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0</div>
 			</div>
 		</div>
 
@@ -2497,7 +2497,7 @@
 						<li><a href="javascript:void(0);" onclick="showThemeSelector(); return false;"><span class="icon solid fa-palette"></span> Theme</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 1.8.6</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0</div>
 			</div>
 		</section>
 
@@ -2579,6 +2579,9 @@
 						</button>
 						<button class="btn-3d small gray" id="sortBtn" onclick="toggleSort()">
 							<span class="icon solid fa-sort-alpha-down" id="sortIcon"></span> <span id="sortLabel">A-Z</span>
+						</button>
+						<button class="btn-3d small purple" id="autoScrapeBtn" onclick="autoScrapeAllArt()" style="display:none;" title="Auto-scrape box art for all games missing art in this console">
+							🖼️ Auto-Scrape All Art
 						</button>
 					</div>
 					<div class="games-grid" id="gamesGrid">
@@ -2791,6 +2794,23 @@
 					<p style="margin: 0; font-size: 0.85em; color: rgba(255,255,255,0.6);">Drag & drop missing ROMs here or <a href="#" onclick="document.getElementById('top25FileInput').click(); return false;" style="color: #f59e0b;">browse</a></p>
 				</div>
 				<input type="file" id="top25FileInput" multiple style="display:none;" onchange="handleTop25Upload(event)">
+			</div>
+		</div>
+
+		<!-- Auto-Scrape Modal -->
+		<div class="modal-overlay" id="autoScrapeModal">
+			<div class="modal-box" style="max-width: 620px; display: flex; flex-direction: column; max-height: 85vh;">
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75em;">
+					<h3 style="color: #a855f7; font-size: 0.75em; margin: 0; font-family: 'Press Start 2P', monospace; text-shadow: 0 0 20px rgba(168,85,247,0.5);">
+						🖼️ AUTO-SCRAPE ART
+					</h3>
+					<button class="close-btn" id="autoScrapeCloseBtn" onclick="closeModal('autoScrapeModal')">&times;</button>
+				</div>
+				<div id="autoScrapeSummary" style="margin-bottom: 0.75em; font-size: 0.85em; color: rgba(255,255,255,0.7); padding: 0.5em 0.75em; background: rgba(168,85,247,0.1); border-radius: 6px; border: 1px solid rgba(168,85,247,0.2);"></div>
+				<div id="autoScrapeProgress" style="flex: 1; overflow-y: auto; max-height: 380px; font-size: 0.8em; font-family: monospace; padding-right: 0.25em;"></div>
+				<div id="autoScrapeFinal" style="margin-top: 1em; padding-top: 0.75em; border-top: 1px solid rgba(168,85,247,0.3); display:none; text-align:center;">
+					<div id="autoScrapeFinalMsg" style="font-size: 0.7em; color: #a855f7; font-family: 'Press Start 2P', monospace; line-height: 2;"></div>
+				</div>
 			</div>
 		</div>
 
@@ -5863,6 +5883,7 @@
 				// Update game count badge and Top 25 button visibility
 				updateGameCountBadge();
 				updateTop25Button();
+				updateAutoScrapeButton();
 				await renderGames();
 			}
 
@@ -5886,6 +5907,7 @@
 				// Update game count badge and hide Top 25 button for All Games view
 				updateGameCountBadge();
 				updateTop25Button();
+				updateAutoScrapeButton();
 				await renderGames();
 			}
 
@@ -6319,6 +6341,18 @@
 				}
 				const consoleKey = getConsoleKey(currentConsole);
 				btn.style.display = topGamesData[consoleKey] ? '' : 'none';
+			}
+
+			function updateAutoScrapeButton() {
+				const btn = document.getElementById('autoScrapeBtn');
+				if (!btn) return;
+				if (!currentConsole || currentConsole === '__all__') {
+					btn.style.display = 'none';
+					return;
+				}
+				const consoleKey = getConsoleKey(currentConsole);
+				const libretroSystem = libretroSystemMap[consoleKey];
+				btn.style.display = libretroSystem ? '' : 'none';
 			}
 
 			let gameConsole = null; // Track which console the current game belongs to
@@ -7260,6 +7294,174 @@
 					hideContextMenu();
 				}
 			});
+
+			// =====================================================================
+			// AUTO-SCRAPE ALL ART
+			// =====================================================================
+			async function autoScrapeAllArt() {
+				if (!currentConsole || currentConsole === '__all__') {
+					showAlert('Please select a specific console first.', 'Auto-Scrape');
+					return;
+				}
+				const consoleKey = getConsoleKey(currentConsole);
+				const libretroSystem = libretroSystemMap[consoleKey];
+				if (!libretroSystem) {
+					showAlert('No libretro thumbnail system found for ' + currentConsole + '.', 'Auto-Scrape');
+					return;
+				}
+				const games = (consoles[currentConsole]?.games || []).filter(g => !g.hasImage);
+				if (!games.length) {
+					showAlert('All games in ' + currentConsole + ' already have box art! 🎉', 'Auto-Scrape');
+					return;
+				}
+
+				const modal = document.getElementById('autoScrapeModal');
+				const progress = document.getElementById('autoScrapeProgress');
+				const summary = document.getElementById('autoScrapeSummary');
+				const finalDiv = document.getElementById('autoScrapeFinal');
+				const finalMsg = document.getElementById('autoScrapeFinalMsg');
+				const closeBtn = document.getElementById('autoScrapeCloseBtn');
+
+				modal.classList.add('active');
+				progress.innerHTML = '';
+				finalDiv.style.display = 'none';
+				closeBtn.disabled = true;
+				closeBtn.style.opacity = '0.4';
+				closeBtn.style.cursor = 'not-allowed';
+				summary.textContent = `Searching ${games.length} games without art...`;
+
+				let found = 0;
+				let done = 0;
+
+				for (const game of games) {
+					// Clean game name for libretro search
+					let cleanName = game.name;
+					const lastDot = cleanName.lastIndexOf('.');
+					if (lastDot > 0) cleanName = cleanName.substring(0, lastDot);
+					for (const pattern of cleanupPatterns) {
+						cleanName = cleanName.replace(pattern, pattern.source === '\\s+' ? ' ' : '');
+					}
+					cleanName = cleanName.trim();
+
+					const row = document.createElement('div');
+					row.style.cssText = 'padding: 0.25em 0.5em; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; gap: 0.5em;';
+					const displayName = game.name.length > 55 ? game.name.substring(0, 52) + '…' : game.name;
+					row.innerHTML = `<span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:rgba(255,255,255,0.75);">${displayName}</span><span style="color:rgba(255,255,255,0.4); flex-shrink:0;">⏳</span>`;
+					progress.appendChild(row);
+					progress.scrollTop = progress.scrollHeight;
+
+					let success = false;
+					try {
+						const results = await searchLibretro(cleanName, currentConsole);
+						if (results.length > 0) {
+							const imgUrl = results[0].full;
+							const r = await fetchWithCorsProxy(imgUrl);
+							if (r.ok) {
+								const blob = await r.blob();
+								await saveImageForGame(blob, game.name, currentConsole);
+								success = true;
+								found++;
+							}
+						}
+					} catch (e) { /* skip failed games silently */ }
+
+					done++;
+					const statusSpan = row.querySelector('span:last-child');
+					statusSpan.textContent = success ? '✅' : '❌';
+					statusSpan.style.color = success ? '#22c55e' : '#ef4444';
+					summary.textContent = `Scraped ${done} / ${games.length} — Found: ${found}`;
+				}
+
+				finalDiv.style.display = 'block';
+				finalMsg.textContent = `${found} of ${games.length} games scraped!`;
+				closeBtn.disabled = false;
+				closeBtn.style.opacity = '';
+				closeBtn.style.cursor = '';
+
+				renderConsoleList();
+				renderGames();
+				updateStats();
+				updateGameCountBadge();
+			}
+
+			async function saveImageForGame(blob, gameName, consoleName) {
+				const img = await createImageBitmap(blob);
+				const profile = deviceProfiles[currentDevice];
+				const maxSize = profile.imageSize || 240;
+
+				const scale = Math.min(maxSize / img.width, maxSize / img.height);
+				const newWidth = Math.round(img.width * scale);
+				const newHeight = Math.round(img.height * scale);
+
+				const canvas = document.createElement('canvas');
+				canvas.width = newWidth;
+				canvas.height = newHeight;
+				const ctx = canvas.getContext('2d');
+				ctx.imageSmoothingEnabled = true;
+				ctx.imageSmoothingQuality = 'high';
+				ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+				const resized = await new Promise(r => canvas.toBlob(r, 'image/png'));
+				const baseName = gameName.substring(0, gameName.lastIndexOf('.'));
+				const consoleData = consoles[consoleName];
+
+				let imageDir, imageFileName;
+
+				if (profile.catalogueStructure) {
+					if (consoleData.boxHandle) {
+						imageDir = consoleData.boxHandle;
+					} else {
+						try {
+							const muosDir = await directoryHandle.getDirectoryHandle('MUOS', { create: true });
+							const infoDir = await muosDir.getDirectoryHandle('info', { create: true });
+							const catalogueDir = await infoDir.getDirectoryHandle('catalogue', { create: true });
+							const catalogueName = consoleData.catalogueName || consoleName;
+							const systemDir = await catalogueDir.getDirectoryHandle(catalogueName, { create: true });
+							const boxDir = await systemDir.getDirectoryHandle('box', { create: true });
+							consoleData.boxHandle = boxDir;
+							imageDir = boxDir;
+						} catch (e) {
+							const boxDir = await consoleData.handle.getDirectoryHandle('box', { create: true });
+							consoleData.boxHandle = boxDir;
+							imageDir = boxDir;
+						}
+					}
+					imageFileName = baseName + '.png';
+				} else if (profile.isMinUI) {
+					if (!consoleData.resHandle) {
+						consoleData.resHandle = await consoleData.handle.getDirectoryHandle('.res', { create: true });
+					}
+					imageDir = consoleData.resHandle;
+					imageFileName = gameName + '.png';
+				} else if (profile.isNextUI) {
+					if (!consoleData.mediaHandle) {
+						consoleData.mediaHandle = await consoleData.handle.getDirectoryHandle('.media', { create: true });
+					}
+					imageDir = consoleData.mediaHandle;
+					imageFileName = baseName + '.png';
+				} else if (profile.emoji === '🧅') {
+					if (!consoleData.imgsHandle) {
+						consoleData.imgsHandle = await consoleData.handle.getDirectoryHandle('Imgs', { create: true });
+					}
+					imageDir = consoleData.imgsHandle;
+					imageFileName = baseName + '.png';
+				} else {
+					imageDir = consoleData.handle;
+					imageFileName = baseName + '.png';
+				}
+
+				const fh = await imageDir.getFileHandle(imageFileName, { create: true });
+				const w = await fh.createWritable();
+				await w.write(resized);
+				await w.close();
+
+				const game = consoleData.games.find(g => g.name === gameName);
+				if (game) {
+					game.hasImage = true;
+					game.imageExt = '.png';
+				}
+			}
+			// =====================================================================
 
 			// Next Missing Art function
 			function goToNextMissingArt() {
