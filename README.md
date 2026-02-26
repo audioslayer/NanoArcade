@@ -14,16 +14,38 @@ Or download this repository for offline use.
 
 ## 🎮 What's New in v2.0
 
-**Mass Auto-Scraper** — The biggest art update yet. Click **🖼️ Auto-Scrape All Art** in the game toolbar to automatically find and save box art for every game in the current console that's missing artwork.
+### 🖼️ Mass Auto-Scraper
+The biggest art update yet. Click **🖼️ Auto-Scrape All Art** in the game toolbar to automatically find and save box art for every game missing artwork in the current console.
 
-- Uses the libretro thumbnail database (thumbnails.libretro.com) — the same source powering the single-game search
+- Tries **5 URL variants per game** — clean name, clean + (USA), clean + (Europe), clean + (Japan), raw filename — dramatically improving hit rate vs single-attempt searches
+- Falls back to directory-listing fuzzy search if direct URLs all miss
 - Live progress modal: each game shows ✅ found or ❌ not found in real-time
-- Cleans ROM filenames (strips region tags, revision codes, etc.) before searching for best match
-- Correctly saves art to the right folder for your OS: MustardOS `box/`, MinUI `.res/`, NextUI `.media/`, Onion OS `Imgs/`, etc.
-- Final summary shows "X of Y games scraped"
-- Powered by CORS proxy fallback chain — works from the browser, no install needed
+- Saves to the correct OS folder structure automatically (MustardOS `box/`, MinUI `.res/`, NextUI `.media/`, Onion OS `Imgs/`, etc.)
+- Final summary: "X of Y games scraped"
 
-**Version bumped to 2.0** — manifest.json and in-app footer updated.
+### 🌍 Region Flags on Game Cards
+ROM filenames are parsed for region tags and a flag emoji is displayed on every game card — `🇺🇸` `🇯🇵` `🇪🇺` `🌍` `🇰🇷` `🇩🇪` `🇨🇳` — giving you instant visual info without any extra clicks.
+
+### 🏷️ ROM Tag Badges
+Special ROM types are highlighted with colored mini-badges on each card:
+- 🟠 **BETA** — beta builds
+- 🔴 **PROTO** — prototypes
+- 🔵 **REV** — revision releases (Rev A, Rev 1, etc.)
+- 🟣 **DISC 2/3** — multi-disc games
+- 🟡 **HACK** — ROM hacks
+- ⚫ **BAD** — known bad dumps
+
+### 🎨 Per-Console Accent Colors
+Each console system has its own color identity applied as a glow on the console icon — NES red, SNES purple, GBA indigo, Genesis blue, PS1 navy, Dreamcast orange, and more. Subtle but sharp.
+
+### 🔍 Floating Zoom Bar
+A sleek frosted vertical slider floats on the right edge of the screen while browsing games. Drag up for bigger cards, drag down for more cards. Default is 8 columns. Preference saves automatically.
+
+### 🗂️ Sort by System in All Games View
+The All Games view now has a sort dropdown: **Name (A-Z)**, **System** (grouped by console with headers), and **Recently Added**. Sort preference is remembered between sessions.
+
+### ✨ Themed Scrollbars
+Custom 5px thin scrollbars throughout the app — dark track with a glowing cyan thumb that matches the overall aesthetic.
 
 ---
 
@@ -257,6 +279,16 @@ The app recognizes and displays icons for:
 - JavaScript enabled
 
 ## Changelog
+
+### v2.0 - R-Shop-Inspired Visual Overhaul + Mass Scraper
+- **Mass Auto-Scraper** — New "🖼️ Auto-Scrape All Art" button batch-fetches box art for every game missing artwork in the current console. Live progress modal, per-OS folder routing, final tally summary.
+- **Multi-URL Fallback Chain** — Art scraper now tries 5 URL variants per game (clean name, +USA, +Europe, +Japan, raw filename) before falling back to fuzzy directory search. Significantly higher hit rate.
+- **Region Flags** — 🇺🇸🇯🇵🇪🇺🌍 flag emoji parsed from ROM filenames and displayed on every game card.
+- **ROM Tag Badges** — Colored pills for Beta (orange), Proto (red), Rev (blue), Disc N (purple), Hack (yellow), Bad dump (grey). Up to 2 badges per card.
+- **Per-Console Accent Colors** — Each system has a color identity (NES red, SNES purple, GBA indigo, etc.) applied as an icon glow when browsing that console.
+- **Floating Zoom Bar** — Vertical frosted slider fixed to the right edge. Drag to resize the game grid (2–12 columns). Default 8 columns, saves to localStorage.
+- **Sort by System** — All Games view now has a sort dropdown: Name, System (with grouped headers), Recently Added.
+- **Themed Scrollbars** — 5px thin scrollbars with cyan glowing thumb throughout the entire app.
 
 ### v1.8.6 - Libretro Thumbnails + Wikipedia Scores + Proxy Fixes
 - **Libretro Thumbnails Integration** - New box art source with 131 systems and thousands of images from [thumbnails.libretro.com](https://thumbnails.libretro.com/). No API key required. Directory listings are cached per system for instant repeat searches.
