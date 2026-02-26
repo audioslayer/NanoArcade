@@ -2622,10 +2622,12 @@
 								<option value="recent">Recently Added</option>
 							</select>
 						</div>
-						<div id="gridZoomControls" style="display:flex; align-items:center; gap:0.3em;">
-							<button class="btn-3d small gray" onclick="changeGridCols(1)" title="Fewer columns (bigger cards)" style="padding:0.3em 0.6em; font-size:0.9em;">+</button>
-							<span id="gridColsLabel" style="color:rgba(255,255,255,0.6); font-size:0.8em; min-width:3.5em; text-align:center;"></span>
-							<button class="btn-3d small gray" onclick="changeGridCols(-1)" title="More columns (smaller cards)" style="padding:0.3em 0.6em; font-size:0.9em;">−</button>
+						<div id="gridZoomControls" style="display:flex; align-items:center; gap:0.5em;" title="Zoom">
+							<span style="font-size:0.75rem; opacity:0.5;">🔍</span>
+							<input type="range" id="gridZoomSlider" min="2" max="12" step="1" value="8"
+								oninput="setGridCols(13 - parseInt(this.value))"
+								style="width:80px; accent-color:#06d6d6; cursor:pointer; vertical-align:middle;" value="5">
+							<span style="font-size:1rem; opacity:0.5;">🔍</span>
 						</div>
 						<button class="btn-3d small purple" id="autoScrapeBtn" onclick="autoScrapeAllArt()" style="display:none;" title="Auto-scrape box art for all games missing art in this console">
 							🖼️ Auto-Scrape All Art
@@ -3390,7 +3392,7 @@
 			let filterMissingOnly = false;
 			let currentSort = 'az';
 			let currentAllGamesSort = localStorage.getItem('nanoarcade_all_sort') || 'name';
-			let gridCols = parseInt(localStorage.getItem('nanoarcade_grid_cols')) || 5;
+			let gridCols = parseInt(localStorage.getItem('nanoarcade_grid_cols')) || 8;
 			let contextMenuTarget = null;
 			let contextMenuConsole = null;
 			let currentDevice = 'muosStandard';
@@ -6304,15 +6306,20 @@
 				const grid = document.getElementById('gamesGrid');
 				if (!grid) return;
 				grid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
-				const label = document.getElementById('gridColsLabel');
-				if (label) label.textContent = `${gridCols} cols`;
+				// Sync slider: sliderValue = 13 - cols
+				const slider = document.getElementById('gridZoomSlider');
+				if (slider) slider.value = Math.max(2, Math.min(12, 13 - gridCols));
+			}
+
+			function setGridCols(cols) {
+				gridCols = Math.max(2, Math.min(12, cols));
+				localStorage.setItem('nanoarcade_grid_cols', gridCols);
+				applyGridCols();
 			}
 
 			function changeGridCols(delta) {
 				// delta > 0 = fewer cols = bigger cards; delta < 0 = more cols = smaller cards
-				gridCols = Math.max(2, Math.min(10, gridCols - delta));
-				localStorage.setItem('nanoarcade_grid_cols', gridCols);
-				applyGridCols();
+				setGridCols(gridCols - delta);
 			}
 
 			// All Games sort
@@ -6335,8 +6342,8 @@
 				}
 			});
 
-			// Initialize grid cols label on startup
-			(function() { const label = document.getElementById('gridColsLabel'); if (label) label.textContent = `${gridCols} cols`; })();
+			// Initialize grid zoom slider on startup
+			(function() { const s = document.getElementById('gridZoomSlider'); if (s) s.value = Math.max(2, Math.min(12, 13 - gridCols)); })();
 
 			// Top 25 Games Feature
 			function normalizeGameName(name) {
