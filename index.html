@@ -2615,6 +2615,18 @@
 						<button class="btn-3d small gray" id="sortBtn" onclick="toggleSort()">
 							<span class="icon solid fa-sort-alpha-down" id="sortIcon"></span> <span id="sortLabel">A-Z</span>
 						</button>
+						<div id="allGamesSortBar" style="display:none; align-items:center; gap:0.35em;">
+							<select id="allGamesSortSelect" onchange="setAllGamesSort(this.value)" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.4em 0.7em; border-radius:6px; font-size:0.85em; cursor:pointer;">
+								<option value="name">Name (A-Z)</option>
+								<option value="system">System</option>
+								<option value="recent">Recently Added</option>
+							</select>
+						</div>
+						<div id="gridZoomControls" style="display:flex; align-items:center; gap:0.3em;">
+							<button class="btn-3d small gray" onclick="changeGridCols(1)" title="Fewer columns (bigger cards)" style="padding:0.3em 0.6em; font-size:0.9em;">+</button>
+							<span id="gridColsLabel" style="color:rgba(255,255,255,0.6); font-size:0.8em; min-width:3.5em; text-align:center;"></span>
+							<button class="btn-3d small gray" onclick="changeGridCols(-1)" title="More columns (smaller cards)" style="padding:0.3em 0.6em; font-size:0.9em;">−</button>
+						</div>
 						<button class="btn-3d small purple" id="autoScrapeBtn" onclick="autoScrapeAllArt()" style="display:none;" title="Auto-scrape box art for all games missing art in this console">
 							🖼️ Auto-Scrape All Art
 						</button>
@@ -3377,6 +3389,8 @@
 			let filesToUpload = [];
 			let filterMissingOnly = false;
 			let currentSort = 'az';
+			let currentAllGamesSort = localStorage.getItem('nanoarcade_all_sort') || 'name';
+			let gridCols = parseInt(localStorage.getItem('nanoarcade_grid_cols')) || 5;
 			let contextMenuTarget = null;
 			let contextMenuConsole = null;
 			let currentDevice = 'muosStandard';
@@ -5965,6 +5979,9 @@
 
 			async function selectConsole(name) {
 				currentConsole = name;
+				// Hide All Games sort bar
+				const _sortBar = document.getElementById('allGamesSortBar');
+				if (_sortBar) _sortBar.style.display = 'none';
 				const displayName = getConsoleDisplayName(name);
 				document.getElementById('currentConsoleName').textContent = displayName;
 				// Set console icon in header
@@ -6007,6 +6024,9 @@
 				document.getElementById('migration').style.display = 'none';
 				document.getElementById('installPwaBtn').style.display = 'none';
 				document.getElementById('games').style.display = 'block';
+				// Show All Games sort bar
+				const sortBar = document.getElementById('allGamesSortBar');
+				if (sortBar) { sortBar.style.display = 'flex'; document.getElementById('allGamesSortSelect').value = currentAllGamesSort; }
 				// Show loading spinner
 				const grid = document.getElementById('gamesGrid');
 				grid.innerHTML = '<div class="loading-container"><div class="spinner"></div><div class="loading-text">Loading all games...</div></div>';
@@ -6111,8 +6131,26 @@
 					filtered = filtered.filter(g => !g.hasImage);
 				}
 
-				// Apply sorting (A-Z or Z-A)
-				if (currentSort === 'za') {
+				// Apply sorting (A-Z, Z-A, or by System for All Games)
+				if (currentConsole === '__all__' && currentAllGamesSort === 'system') {
+					filtered.sort((a, b) => {
+						const cn = (a.consoleName || '').localeCompare(b.consoleName || '');
+						return cn !== 0 ? cn : a.baseName.localeCompare(b.baseName);
+					});
+					// Inject system header sentinels
+					const withHeaders = [];
+					let lastCons = null;
+					for (const game of filtered) {
+						if (game.consoleName !== lastCons) {
+							withHeaders.push({ isSystemHeader: true, consoleName: game.consoleName });
+							lastCons = game.consoleName;
+						}
+						withHeaders.push(game);
+					}
+					filtered = withHeaders;
+				} else if (currentConsole === '__all__' && currentAllGamesSort === 'recent') {
+					// Recent: keep original insertion order (no sort)
+				} else if (currentSort === 'za') {
 					filtered.sort((a, b) => b.baseName.localeCompare(a.baseName));
 				} else {
 					filtered.sort((a, b) => a.baseName.localeCompare(b.baseName));
@@ -6126,6 +6164,10 @@
 				}
 
 				const cards = await Promise.all(filtered.map(async game => {
+					// Handle system group header sentinels
+					if (game.isSystemHeader) {
+						return `<div style="grid-column:1/-1; padding:0.6em 0.4em 0.3em; margin-top:0.75em; font-size:0.9em; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.5); border-bottom:1px solid rgba(255,255,255,0.1);">${game.consoleName}</div>`;
+					}
 					let imgSrc = '';
 					// Get the correct handle for this game (important for "All Games" view)
 					const gameConsoleName = game.consoleName || currentConsole;
@@ -6232,6 +6274,7 @@
 					</div>`;
 				}));
 				grid.innerHTML = cards.join('');
+				applyGridCols();
 			}
 
 			function filterGames() { renderGames(); }
@@ -6255,6 +6298,45 @@
 				document.getElementById('sortLabel').textContent = currentSort === 'az' ? 'A-Z' : 'Z-A';
 				renderGames();
 			}
+
+			// Grid zoom helpers
+			function applyGridCols() {
+				const grid = document.getElementById('gamesGrid');
+				if (!grid) return;
+				grid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+				const label = document.getElementById('gridColsLabel');
+				if (label) label.textContent = `${gridCols} cols`;
+			}
+
+			function changeGridCols(delta) {
+				// delta > 0 = fewer cols = bigger cards; delta < 0 = more cols = smaller cards
+				gridCols = Math.max(2, Math.min(10, gridCols - delta));
+				localStorage.setItem('nanoarcade_grid_cols', gridCols);
+				applyGridCols();
+			}
+
+			// All Games sort
+			function setAllGamesSort(val) {
+				currentAllGamesSort = val;
+				localStorage.setItem('nanoarcade_all_sort', val);
+				renderGames();
+			}
+
+			// Keyboard shortcuts for grid zoom
+			document.addEventListener('keydown', function(e) {
+				if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+				if (!currentConsole) return;
+				if (e.key === '+' || e.key === '=') {
+					e.preventDefault();
+					changeGridCols(1); // bigger cards (fewer cols)
+				} else if (e.key === '-') {
+					e.preventDefault();
+					changeGridCols(-1); // smaller cards (more cols)
+				}
+			});
+
+			// Initialize grid cols label on startup
+			(function() { const label = document.getElementById('gridColsLabel'); if (label) label.textContent = `${gridCols} cols`; })();
 
 			// Top 25 Games Feature
 			function normalizeGameName(name) {
@@ -6791,6 +6873,28 @@
 				'Arcade': 'MAME'
 			};
 			const _libretroListCache = {};
+
+			function buildLibretroFallbackUrls(system, filename) {
+				const base = 'https://thumbnails.libretro.com';
+				const dir = `${base}/${encodeURIComponent(system)}/Named_Boxarts`;
+				// Strip extension
+				const nameNoExt = filename.replace(/\.[^.]+$/, '');
+				// Clean name: strip ALL parens/brackets content
+				const cleanName = nameNoExt.replace(/\s*[\(\[][^\)\]]*[\)\]]/g, '').trim();
+				const variants = [
+					cleanName,
+					`${cleanName} (USA)`,
+					`${cleanName} (Europe)`,
+					`${cleanName} (Japan)`,
+					nameNoExt
+				];
+				// Deduplicate while preserving order
+				const seen = new Set();
+				return variants
+					.filter(v => v && v.trim())
+					.filter(v => { if (seen.has(v)) return false; seen.add(v); return true; })
+					.map(v => `${dir}/${encodeURIComponent(v)}.png`);
+			}
 
 			async function searchLibretro(q, consoleName) {
 				const images = [];
@@ -7469,10 +7573,11 @@
 					progress.scrollTop = progress.scrollHeight;
 
 					let success = false;
-					try {
-						const results = await searchLibretro(cleanName, currentConsole);
-						if (results.length > 0) {
-							const imgUrl = results[0].full;
+					// Try direct URL fallback chain first (no directory listing needed)
+					const fallbackUrls = buildLibretroFallbackUrls(libretroSystem, game.name);
+					for (const imgUrl of fallbackUrls) {
+						if (success) break;
+						try {
 							const r = await fetchWithCorsProxy(imgUrl);
 							if (r.ok) {
 								const blob = await r.blob();
@@ -7480,8 +7585,24 @@
 								success = true;
 								found++;
 							}
-						}
-					} catch (e) { /* skip failed games silently */ }
+						} catch (e) { /* try next url */ }
+					}
+					// If fallback chain failed, try directory-based search
+					if (!success) {
+						try {
+							const results = await searchLibretro(cleanName, currentConsole);
+							if (results.length > 0) {
+								const imgUrl = results[0].full;
+								const r = await fetchWithCorsProxy(imgUrl);
+								if (r.ok) {
+									const blob = await r.blob();
+									await saveImageForGame(blob, game.name, currentConsole);
+									success = true;
+									found++;
+								}
+							}
+						} catch (e) { /* skip failed games silently */ }
+					}
 
 					done++;
 					const statusSpan = row.querySelector('span:last-child');
