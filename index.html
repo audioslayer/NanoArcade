@@ -491,18 +491,22 @@
 				writing-mode: vertical-lr;
 				direction: rtl;
 				width: 14px;
-				height: 90px;
+				height: 140px;
 				margin: 0;
+				padding: 0;
 			}
 			.zoom-slider-vertical::-webkit-slider-runnable-track {
-				width: 4px;
-				height: 90px;
-				border-radius: 2px;
-				background: rgba(255,255,255,0.15);
+				width: 3px;
+				height: 140px;
+				border-radius: 4px;
+				background: rgba(255,255,255,0.1);
 			}
 			.zoom-slider-vertical::-webkit-slider-thumb {
 				margin-top: 0;
-				margin-left: -5px;
+				margin-left: -5.5px;
+				width: 16px;
+				height: 16px;
+				box-shadow: 0 0 10px rgba(6,214,214,0.9), 0 0 24px rgba(6,214,214,0.4);
 			}
 
 			/* ── Global custom scrollbars ── */
@@ -2685,13 +2689,11 @@
 			</section>
 
 			<!-- Games Section -->
-			<!-- Floating vertical zoom control -->
-			<div id="gridZoomControls" style="display:none; position:fixed; right:16px; top:50%; transform:translateY(-50%); z-index:900; flex-direction:column; align-items:center; gap:8px; background:rgba(15,25,45,0.75); backdrop-filter:blur(12px); border:1px solid rgba(6,214,214,0.2); border-radius:24px; padding:12px 8px; box-shadow:0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);">
-				<i class="fas fa-search-plus" style="font-size:0.7em; color:#06d6d6; opacity:0.7;"></i>
+			<!-- Floating vertical zoom bar -->
+			<div id="gridZoomControls" style="display:none; position:fixed; right:14px; top:50%; transform:translateY(-50%); z-index:900; flex-direction:column; align-items:center; background:rgba(10,18,35,0.6); backdrop-filter:blur(16px); border:1px solid rgba(6,214,214,0.15); border-radius:32px; padding:16px 10px; box-shadow:0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);">
 				<input type="range" id="gridZoomSlider" min="2" max="12" step="1"
 					oninput="setGridCols(13 - parseInt(this.value))"
 					class="zoom-slider zoom-slider-vertical">
-				<i class="fas fa-search-minus" style="font-size:0.7em; color:#06d6d6; opacity:0.7;"></i>
 			</div>
 
 			<section id="games" class="wrapper style1 fade-up" style="display:none;">
