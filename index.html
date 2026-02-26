@@ -487,6 +487,23 @@
 				box-shadow: 0 0 8px rgba(6,214,214,0.8);
 				cursor: pointer;
 			}
+			.zoom-slider-vertical {
+				writing-mode: vertical-lr;
+				direction: rtl;
+				width: 14px;
+				height: 90px;
+				margin: 0;
+			}
+			.zoom-slider-vertical::-webkit-slider-runnable-track {
+				width: 4px;
+				height: 90px;
+				border-radius: 2px;
+				background: rgba(255,255,255,0.15);
+			}
+			.zoom-slider-vertical::-webkit-slider-thumb {
+				margin-top: 0;
+				margin-left: -5px;
+			}
 
 			/* ── Global custom scrollbars ── */
 			::-webkit-scrollbar {
@@ -2668,6 +2685,15 @@
 			</section>
 
 			<!-- Games Section -->
+			<!-- Floating vertical zoom control -->
+			<div id="gridZoomControls" style="display:none; position:fixed; right:16px; top:50%; transform:translateY(-50%); z-index:900; flex-direction:column; align-items:center; gap:8px; background:rgba(15,25,45,0.75); backdrop-filter:blur(12px); border:1px solid rgba(6,214,214,0.2); border-radius:24px; padding:12px 8px; box-shadow:0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);">
+				<i class="fas fa-search-plus" style="font-size:0.7em; color:#06d6d6; opacity:0.7;"></i>
+				<input type="range" id="gridZoomSlider" min="2" max="12" step="1"
+					oninput="setGridCols(13 - parseInt(this.value))"
+					class="zoom-slider zoom-slider-vertical">
+				<i class="fas fa-search-minus" style="font-size:0.7em; color:#06d6d6; opacity:0.7;"></i>
+			</div>
+
 			<section id="games" class="wrapper style1 fade-up" style="display:none;">
 				<div class="inner">
 					<div class="console-header">
@@ -2696,15 +2722,7 @@
 								<option value="recent">Recently Added</option>
 							</select>
 						</div>
-						<div id="gridZoomControls" title="Zoom" style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.12); border:2px solid rgba(255,255,255,0.08); border-radius:0.75rem; box-shadow:0 4px 0 rgba(0,0,0,0.3); transform:skew(-10deg); padding:6px 14px; gap:0.6em; cursor:default; backdrop-filter:blur(4px);">
-							<span style="transform:skew(10deg); display:flex; align-items:center; gap:0.6em;">
-								<i class="fas fa-search-minus" style="font-size:0.65em; opacity:0.5; color:#06d6d6;"></i>
-								<input type="range" id="gridZoomSlider" min="2" max="12" step="1"
-									oninput="setGridCols(13 - parseInt(this.value))"
-									class="zoom-slider">
-								<i class="fas fa-search-plus" style="font-size:0.65em; opacity:0.5; color:#06d6d6;"></i>
-							</span>
-						</div>
+
 						<button class="btn-3d small purple" id="autoScrapeBtn" onclick="autoScrapeAllArt()" style="display:none;" title="Auto-scrape box art for all games missing art in this console">
 							🖼️ Auto-Scrape All Art
 						</button>
@@ -6063,7 +6081,7 @@
 				// Hide intro and migration, show games
 				document.getElementById('intro').style.display = 'none';
 				document.getElementById('migration').style.display = 'none';
-				document.getElementById('games').style.display = 'block';
+				document.getElementById('games').style.display = 'block'; document.getElementById('gridZoomControls').style.display = 'flex';
 				// Hide install button when leaving intro
 				document.getElementById('installPwaBtn').style.display = 'none';
 				// Show loading spinner
@@ -6091,7 +6109,7 @@
 				document.getElementById('intro').style.display = 'none';
 				document.getElementById('migration').style.display = 'none';
 				document.getElementById('installPwaBtn').style.display = 'none';
-				document.getElementById('games').style.display = 'block';
+				document.getElementById('games').style.display = 'block'; document.getElementById('gridZoomControls').style.display = 'flex';
 				// Show All Games sort bar
 				const sortBar = document.getElementById('allGamesSortBar');
 				if (sortBar) { sortBar.style.display = 'flex'; document.getElementById('allGamesSortSelect').value = currentAllGamesSort; }
@@ -6154,7 +6172,7 @@
 				document.getElementById('floatingUpload').classList.remove('visible');
 				// Show intro, hide games and migration
 				document.getElementById('intro').style.display = '';
-				document.getElementById('games').style.display = 'none';
+				document.getElementById('games').style.display = 'none'; document.getElementById('gridZoomControls').style.display = 'none';
 				document.getElementById('migration').style.display = 'none';
 				document.getElementById('currentConsoleName').textContent = 'Select a console to view games';
 				document.getElementById('currentConsoleIcon').style.display = 'none';
@@ -8022,7 +8040,7 @@
 						section.style.display = 'block';
 						// Hide other sections
 						document.getElementById('intro').style.display = 'none';
-						document.getElementById('games').style.display = 'none';
+						document.getElementById('games').style.display = 'none'; document.getElementById('gridZoomControls').style.display = 'none';
 					}
 					section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 				}
@@ -8569,7 +8587,7 @@
 							currentConsole = uploadedToConsole;
 							document.getElementById('currentConsoleName').textContent = uploadedToConsole;
 							document.getElementById('intro').style.display = 'none';
-							document.getElementById('games').style.display = 'block';
+							document.getElementById('games').style.display = 'block'; document.getElementById('gridZoomControls').style.display = 'flex';
 							await renderGames();
 							// Open game modal for the first uploaded game to add artwork
 							if (uploadedGames.length > 0) {
