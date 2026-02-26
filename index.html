@@ -360,6 +360,41 @@
 				font-size: 0.7em;
 			}
 
+			.game-card .region-flag {
+				position: absolute;
+				bottom: 5px;
+				left: 5px;
+				background: rgba(0,0,0,0.6);
+				padding: 2px 6px;
+				border-radius: 10px;
+				font-size: 0.75rem;
+				line-height: 1.3;
+				pointer-events: none;
+				backdrop-filter: blur(2px);
+			}
+
+			.game-card .rom-tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 3px;
+				padding: 2px 8px 6px;
+				justify-content: center;
+			}
+
+			.game-card .rom-tag {
+				font-size: 0.55rem;
+				padding: 2px 6px;
+				border-radius: 8px;
+				font-weight: 700;
+				letter-spacing: 0.04em;
+				color: #fff;
+				text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+			}
+
+			.console-header {
+				transition: border-left-color 0.3s, padding-left 0.3s;
+			}
+
 			/* Top 25 list styles */
 			.top25-item {
 				display: flex;
@@ -5772,6 +5807,76 @@
 				return name.trim() + ext;
 			}
 
+			// Region flag detection from filename
+			function getRegionFlag(filename) {
+				if (/\((USA|U|US)\)/i.test(filename)) return '🇺🇸';
+				if (/\((Europe|EUR?|EU)\)/i.test(filename)) return '🇪🇺';
+				if (/\((Japan|J|JP)\)/i.test(filename)) return '🇯🇵';
+				if (/\(World\)/i.test(filename)) return '🌍';
+				if (/\(Korea\)/i.test(filename)) return '🇰🇷';
+				if (/\(Germany\)/i.test(filename)) return '🇩🇪';
+				if (/\((China|CN)\)/i.test(filename)) return '🇨🇳';
+				return '';
+			}
+
+			// ROM special tag badge detection
+			function getRomTags(filename) {
+				const tags = [];
+				if (/\(Beta[^)]*\)/i.test(filename)) tags.push({ label: 'BETA', color: '#f97316' });
+				if (/\((Proto|Prototype)[^)]*\)/i.test(filename)) tags.push({ label: 'PROTO', color: '#ef4444' });
+				if (/\(Rev\s*[A-Za-z0-9]+\)/i.test(filename)) tags.push({ label: 'REV', color: '#3b82f6' });
+				const discMatch = filename.match(/\(Disc\s*(\d+)\)/i);
+				if (discMatch) tags.push({ label: `DISC ${discMatch[1]}`, color: '#a855f7' });
+				if (/\(Hack[^)]*\)/i.test(filename)) tags.push({ label: 'HACK', color: '#eab308' });
+				if (/\[b\d*\]/i.test(filename)) tags.push({ label: 'BAD', color: '#6b7280' });
+				return tags.slice(0, 2);
+			}
+
+			// Per-console accent colors
+			const consoleAccentColors = {
+				'nes': '#e60012', 'fc': '#e60012', 'fds': '#e60012',
+				'snes': '#6a0dad', 'sfc': '#6a0dad',
+				'n64': '#009ac7',
+				'gb': '#8bac0f',
+				'gbc': '#c8005c',
+				'gba': '#6b40ac',
+				'nds': '#d0021b', 'ds': '#d0021b',
+				'genesis': '#00a0e9', 'md': '#00a0e9',
+				'saturn': '#5c6bc0',
+				'dc': '#f97c00',
+				'ps': '#003087', 'psx': '#003087', 'ps1': '#003087',
+				'psp': '#00439c',
+				'gg': '#1a1a2e', 'gamegear': '#1a1a2e',
+			};
+
+			function getConsoleAccentColor(consoleName) {
+				const lower = (consoleName || '').toLowerCase();
+				return consoleAccentColors[lower] || '#06d6d6';
+			}
+
+			function applyConsoleAccent(consoleName) {
+				const color = getConsoleAccentColor(consoleName);
+				const headerEl = document.querySelector('#games .console-header');
+				if (headerEl) {
+					headerEl.style.borderLeft = `4px solid ${color}`;
+					headerEl.style.paddingLeft = '14px';
+				}
+				const iconEl = document.getElementById('currentConsoleIcon');
+				if (iconEl) {
+					iconEl.style.filter = `drop-shadow(0 0 8px ${color}80)`;
+				}
+			}
+
+			function resetConsoleAccent() {
+				const headerEl = document.querySelector('#games .console-header');
+				if (headerEl) {
+					headerEl.style.borderLeft = '';
+					headerEl.style.paddingLeft = '';
+				}
+				const iconEl = document.getElementById('currentConsoleIcon');
+				if (iconEl) iconEl.style.filter = '';
+			}
+
 			async function scanDrive() {
 				try {
 					const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
@@ -5867,6 +5972,8 @@
 				iconEl.src = getConsoleIcon(name);
 				iconEl.alt = displayName;
 				iconEl.style.display = 'block';
+				// Apply per-console accent color
+				applyConsoleAccent(name);
 				document.getElementById('floatingUpload').classList.add('visible');
 				// Hide intro and migration, show games
 				document.getElementById('intro').style.display = 'none';
@@ -5892,6 +5999,8 @@
 				document.getElementById('currentConsoleName').textContent = 'All Games';
 				// Hide console icon for All Games view
 				document.getElementById('currentConsoleIcon').style.display = 'none';
+				// Reset console accent for All Games
+				resetConsoleAccent();
 				document.getElementById('floatingUpload').classList.add('visible');
 				// Hide intro and migration, show games, hide install button
 				document.getElementById('intro').style.display = 'none';
@@ -6104,12 +6213,21 @@
 					const gameTitle = game.relativePath && game.relativePath.includes('/')
 						? `${game.baseName} (${game.relativePath.substring(0, game.relativePath.lastIndexOf('/'))})`
 						: game.baseName;
+					// Region flag and ROM tag badges
+					const regionFlag = getRegionFlag(game.name);
+					const flagHtml = regionFlag ? `<span class="region-flag">${regionFlag}</span>` : '';
+					const romTags = getRomTags(game.name);
+					const tagsHtml = romTags.length > 0
+						? `<div class="rom-tags">${romTags.map(t => `<span class="rom-tag" style="background:${t.color}">${t.label}</span>`).join('')}</div>`
+						: '';
 					return `<div class="game-card" onclick="openGameModal('${game.name.replace(/'/g, "\\'")}', '${gameConsoleName.replace(/'/g, "\\'")}')" oncontextmenu="showContextMenu(event, '${game.name.replace(/'/g, "\\'")}', '${gameConsoleName.replace(/'/g, "\\'")}')">
 						<div class="image-container">
 							${imgSrc ? `<img src="${imgSrc}">` : '<span class="no-image">?</span>'}
 							${!game.hasImage ? '<span class="missing-badge">No Image</span>' : ''}
+							${flagHtml}
 						</div>
 						<div class="game-name" title="${gameTitle}">${game.baseName}</div>
+						${tagsHtml}
 						${consoleLabel}
 					</div>`;
 				}));
