@@ -280,7 +280,7 @@ The app recognizes and displays icons for:
 
 ## Changelog
 
-### v2.0 - R-Shop-Inspired Visual Overhaul + Mass Scraper
+### v2.0 - Mass Scraper, Region Flags, ROM Badges & More
 - **Mass Auto-Scraper** — New "🖼️ Auto-Scrape All Art" button batch-fetches box art for every game missing artwork in the current console. Live progress modal, per-OS folder routing, final tally summary.
 - **Multi-URL Fallback Chain** — Art scraper now tries 5 URL variants per game (clean name, +USA, +Europe, +Japan, raw filename) before falling back to fuzzy directory search. Significantly higher hit rate.
 - **Region Flags** — 🇺🇸🇯🇵🇪🇺🌍 flag emoji parsed from ROM filenames and displayed on every game card.
