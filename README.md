@@ -12,6 +12,15 @@ Or download this repository for offline use.
 
 ---
 
+## Security Hotfix in v2.0.1
+
+- Prevents filesystem-derived ROM, console, upload, and save names from being interpreted as HTML or JavaScript
+- Replaces affected inline event handlers with safely bound DOM event listeners
+- Validates image-picker URLs against trusted HTTPS artwork hosts before rendering
+- Preserves desktop and mobile navigation, game cards, artwork search, uploads, auto-scraping, and save management behavior
+
+---
+
 ## 🎮 What's New in v2.0
 
 ### 🖼️ Mass Auto-Scraper
@@ -279,6 +288,13 @@ The app recognizes and displays icons for:
 - JavaScript enabled
 
 ## Changelog
+
+### v2.0.1 - Security Hotfix
+- **Filesystem Name Safety** - ROM, console, upload, and save filenames now render as text and can no longer inject markup or inline JavaScript.
+- **Safe Event Binding** - Affected game, console, image-picker, upload, and save actions now use DOM event listeners instead of interpolated inline handlers.
+- **Trusted Artwork URLs** - Image-picker results are restricted to expected HTTPS hosts for Libretro, TheGamesDB, and GameFAQs.
+- **DOM Clobbering Protection** - Filesystem-derived values can no longer create application elements or duplicate application IDs.
+- **Cache Refresh** - The service-worker cache version was bumped so installed users receive the hotfix.
 
 ### v2.0 - Mass Scraper, Region Flags, ROM Badges & More
 - **Mass Auto-Scraper** — New "🖼️ Auto-Scrape All Art" button batch-fetches box art for every game missing artwork in the current console. Live progress modal, per-OS folder routing, final tally summary.
