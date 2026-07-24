@@ -10,6 +10,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="Box art manager for retro gaming handhelds - Support for MustardOS, Onion OS, DrUm78, MinUI, NextUI and more">
 		<meta name="theme-color" content="#6c5ce7">
+		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		<meta name="apple-mobile-web-app-title" content="NanoArcade">
@@ -2594,7 +2595,7 @@
 				<button class="btn-3d purple" onclick="showThemeSelector(); toggleMobileMenu();" style="margin-bottom: 10px;">
 					<span class="icon solid fa-palette"></span> Theme
 				</button>
-				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.2</div>
+				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.3</div>
 			</div>
 		</div>
 
@@ -2627,7 +2628,7 @@
 						<li><a href="javascript:void(0);" onclick="showThemeSelector(); return false;"><span class="icon solid fa-palette"></span> Theme</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.2</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.3</div>
 			</div>
 		</section>
 
@@ -6939,12 +6940,35 @@
 				}
 			}
 
+			// TheGamesDB's CDN allows display in <img> tags but not browser fetch().
+			// Route only its trusted image path through a CORS-enabled image cache.
+			function getTrustedImageProxyUrl(url) {
+				try {
+					const parsed = new URL(url);
+					if (
+						parsed.protocol === 'https:' &&
+						parsed.hostname === 'cdn.thegamesdb.net' &&
+						parsed.pathname.startsWith('/images/')
+					) {
+						return `https://wsrv.nl/?url=${encodeURIComponent(parsed.href)}`;
+					}
+				} catch { /* invalid URL; use normal failure path */ }
+				return null;
+			}
+
 			// Shared fetch helper: use direct CORS where supported, then proxy fallback
 			async function fetchWithCorsProxy(url, options = {}) {
 				if (supportsDirectCors(url)) {
 					try {
 						return await fetchWithTimeout(url, options);
 					} catch (e) { /* try proxy fallback */ }
+				}
+
+				const trustedImageProxyUrl = getTrustedImageProxyUrl(url);
+				if (trustedImageProxyUrl) {
+					try {
+						return await fetchWithTimeout(trustedImageProxyUrl, options);
+					} catch (e) { /* try general proxy fallback */ }
 				}
 
 				const proxies = [

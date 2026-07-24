@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nanoarcade-v2.0.2';
+const CACHE_NAME = 'nanoarcade-v2.0.3';
 const urlsToCache = [
   '/NanoArcade/',
   '/NanoArcade/index.html',
@@ -8,13 +8,13 @@ const urlsToCache = [
   '/NanoArcade/assets/images/logo.png',
   '/NanoArcade/assets/css/main.css',
   '/NanoArcade/assets/css/fontawesome-all.min.css',
-  '/NanoArcade/icons/arcade.svg',
-  '/NanoArcade/icons/gameboy.svg',
-  '/NanoArcade/icons/nes.svg',
-  '/NanoArcade/icons/snes.svg',
-  '/NanoArcade/icons/genesis.svg',
-  '/NanoArcade/icons/gba.svg',
-  '/NanoArcade/icons/gbc.svg'
+  '/NanoArcade/icons/arcade.png',
+  '/NanoArcade/icons/gb.png',
+  '/NanoArcade/icons/nes.png',
+  '/NanoArcade/icons/snes.png',
+  '/NanoArcade/icons/md.png',
+  '/NanoArcade/icons/gba.png',
+  '/NanoArcade/icons/gbc.png'
 ];
 
 // Install event - cache assets
@@ -23,7 +23,16 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('NanoArcade: Caching app shell');
-        return cache.addAll(urlsToCache);
+        return Promise.allSettled(
+          urlsToCache.map(url => cache.add(url))
+        ).then(results => {
+          const failedUrls = results
+            .map((result, index) => result.status === 'rejected' ? urlsToCache[index] : null)
+            .filter(Boolean);
+          if (failedUrls.length > 0) {
+            console.warn('NanoArcade: Some optional app-shell assets could not be cached', failedUrls);
+          }
+        });
       })
       .catch(err => {
         console.log('NanoArcade: Cache failed, continuing anyway', err);

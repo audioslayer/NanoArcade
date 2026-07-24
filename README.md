@@ -12,6 +12,15 @@ Or download this repository for offline use.
 
 ---
 
+## TheGamesDB & PWA Hotfix in v2.0.3
+
+- Restores saving artwork selected from TheGamesDB without relying on the failing general-purpose CORS proxy
+- Routes only trusted TheGamesDB CDN image paths through a CORS-enabled image cache
+- Repairs the service-worker app-shell icon paths and prevents one optional asset from discarding the full cache
+- Adds the current mobile web app capability metadata
+
+---
+
 ## Artwork Hotfix in v2.0.2
 
 - Restores Find Art downloads and saving when public CORS proxies reject Libretro images
@@ -296,6 +305,13 @@ The app recognizes and displays icons for:
 - JavaScript enabled
 
 ## Changelog
+
+### v2.0.3 - TheGamesDB & PWA Hotfix
+- **TheGamesDB Downloads Restored** - Selected artwork downloads through a CORS-enabled image cache restricted to TheGamesDB's trusted HTTPS image path.
+- **App Shell Cache Repaired** - Service-worker icon paths now match the PNG files shipped by NanoArcade.
+- **Resilient Offline Install** - A failed optional asset no longer prevents the rest of the app shell from being cached.
+- **PWA Metadata Updated** - Adds the current `mobile-web-app-capable` metadata while retaining Apple compatibility.
+- **Cache Refresh** - The service-worker cache version was bumped so installed users receive the hotfix.
 
 ### v2.0.2 - Artwork Download Hotfix
 - **Reliable Libretro Downloads** - Selected artwork now downloads directly from Libretro's official GitHub repositories, which support browser CORS.
