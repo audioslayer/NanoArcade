@@ -1,7 +1,7 @@
 {
   "name": "NanoArcade Manager",
   "short_name": "NanoArcade",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Box art manager for retro gaming handhelds - Support for MustardOS, Onion OS, DrUm78, MinUI, NextUI and more",
   "start_url": "/NanoArcade/",
   "scope": "/NanoArcade/",
