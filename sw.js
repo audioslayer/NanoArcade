@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nanoarcade-v2.0.1';
+const CACHE_NAME = 'nanoarcade-v2.0.2';
 const urlsToCache = [
   '/NanoArcade/',
   '/NanoArcade/index.html',

@@ -12,6 +12,14 @@ Or download this repository for offline use.
 
 ---
 
+## Artwork Hotfix in v2.0.2
+
+- Restores Find Art downloads and saving when public CORS proxies reject Libretro images
+- Uses Libretro's official GitHub repositories for CORS-safe artwork search and downloads
+- Keeps the v2.0.1 trusted-host validation and DOM injection protections intact
+
+---
+
 ## Security Hotfix in v2.0.1
 
 - Prevents filesystem-derived ROM, console, upload, and save names from being interpreted as HTML or JavaScript
@@ -288,6 +296,13 @@ The app recognizes and displays icons for:
 - JavaScript enabled
 
 ## Changelog
+
+### v2.0.2 - Artwork Download Hotfix
+- **Reliable Libretro Downloads** - Selected artwork now downloads directly from Libretro's official GitHub repositories, which support browser CORS.
+- **Proxy-Free Libretro Search** - Artwork listings use the official Libretro GitHub tree API instead of depending on public CORS proxies.
+- **Secure Source Validation** - Raw GitHub artwork is accepted only from the `libretro-thumbnails` organization and `Named_Boxarts` paths.
+- **Fallback Preserved** - Existing proxy fallbacks remain available for non-Libretro artwork sources.
+- **Cache Refresh** - The service-worker cache version was bumped so installed users receive the fix.
 
 ### v2.0.1 - Security Hotfix
 - **Filesystem Name Safety** - ROM, console, upload, and save filenames now render as text and can no longer inject markup or inline JavaScript.

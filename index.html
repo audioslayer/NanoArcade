@@ -2594,7 +2594,7 @@
 				<button class="btn-3d purple" onclick="showThemeSelector(); toggleMobileMenu();" style="margin-bottom: 10px;">
 					<span class="icon solid fa-palette"></span> Theme
 				</button>
-				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.1</div>
+				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.2</div>
 			</div>
 		</div>
 
@@ -2627,7 +2627,7 @@
 						<li><a href="javascript:void(0);" onclick="showThemeSelector(); return false;"><span class="icon solid fa-palette"></span> Theme</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.1</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.2</div>
 			</div>
 		</section>
 
@@ -6920,8 +6920,33 @@
 				document.getElementById('imagePicker').classList.remove('active');
 			}
 
-			// Shared CORS proxy helper with fallback
+			async function fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
+				const controller = new AbortController();
+				const timeout = setTimeout(() => controller.abort(), timeoutMs);
+				try {
+					return await fetch(url, { ...options, signal: controller.signal });
+				} finally {
+					clearTimeout(timeout);
+				}
+			}
+
+			function supportsDirectCors(url) {
+				try {
+					const hostname = new URL(url).hostname;
+					return hostname === 'raw.githubusercontent.com' || hostname === 'api.github.com';
+				} catch {
+					return false;
+				}
+			}
+
+			// Shared fetch helper: use direct CORS where supported, then proxy fallback
 			async function fetchWithCorsProxy(url, options = {}) {
+				if (supportsDirectCors(url)) {
+					try {
+						return await fetchWithTimeout(url, options);
+					} catch (e) { /* try proxy fallback */ }
+				}
+
 				const proxies = [
 					`https://corsproxy.io/?${encodeURIComponent(url)}`,
 					`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
@@ -6929,10 +6954,7 @@
 				];
 				for (const proxyUrl of proxies) {
 					try {
-						const controller = new AbortController();
-						const timeout = setTimeout(() => controller.abort(), 8000);
-						const response = await fetch(proxyUrl, { ...options, signal: controller.signal });
-						clearTimeout(timeout);
+						const response = await fetchWithTimeout(proxyUrl, options);
 						if (response.ok) return response;
 					} catch (e) { /* try next proxy */ }
 				}
@@ -6949,13 +6971,25 @@
 					if (url.protocol !== 'https:') return null;
 					const trustedHosts = [
 						'thumbnails.libretro.com',
+						'raw.githubusercontent.com',
 						'cdn.thegamesdb.net',
 						'gamefaqs.gamespot.com'
 					];
 					const trusted = trustedHosts.some(host =>
 						url.hostname === host || url.hostname.endsWith(`.${host}`)
 					);
-					return trusted ? url.href : null;
+					if (!trusted) return null;
+
+					if (url.hostname === 'raw.githubusercontent.com') {
+						const pathParts = url.pathname.split('/').filter(Boolean);
+						const isOfficialLibretroThumbnail =
+							pathParts[0] === 'libretro-thumbnails' &&
+							pathParts[2] === 'master' &&
+							pathParts[3] === 'Named_Boxarts';
+						if (!isOfficialLibretroThumbnail) return null;
+					}
+
+					return url.href;
 				} catch {
 					return null;
 				}
@@ -7125,9 +7159,16 @@
 			};
 			const _libretroListCache = {};
 
+			function getLibretroRepositoryName(system) {
+				return system.replace(/ /g, '_');
+			}
+
+			function buildLibretroRawImageUrl(system, filename) {
+				const repository = getLibretroRepositoryName(system);
+				return `https://raw.githubusercontent.com/libretro-thumbnails/${encodeURIComponent(repository)}/master/Named_Boxarts/${encodeURIComponent(filename)}`;
+			}
+
 			function buildLibretroFallbackUrls(system, filename) {
-				const base = 'https://thumbnails.libretro.com';
-				const dir = `${base}/${encodeURIComponent(system)}/Named_Boxarts`;
 				// Strip extension
 				const nameNoExt = filename.replace(/\.[^.]+$/, '');
 				// Clean name: strip ALL parens/brackets content
@@ -7144,7 +7185,7 @@
 				return variants
 					.filter(v => v && v.trim())
 					.filter(v => { if (seen.has(v)) return false; seen.add(v); return true; })
-					.map(v => `${dir}/${encodeURIComponent(v)}.png`);
+					.map(v => buildLibretroRawImageUrl(system, `${v}.png`));
 			}
 
 			async function searchLibretro(q, consoleName) {
@@ -7153,22 +7194,38 @@
 				const libretroSystem = libretroSystemMap[consoleKey];
 				if (!libretroSystem) return images;
 
-				const baseUrl = 'https://thumbnails.libretro.com';
-				const listUrl = `${baseUrl}/${encodeURIComponent(libretroSystem)}/Named_Boxarts/`;
-
 				// Cache directory listings to avoid re-fetching
 				let fileNames = _libretroListCache[libretroSystem];
 				if (!fileNames) {
+					const repository = getLibretroRepositoryName(libretroSystem);
+					const treeRef = encodeURIComponent('master:Named_Boxarts');
+					const treeUrl = `https://api.github.com/repos/libretro-thumbnails/${encodeURIComponent(repository)}/git/trees/${treeRef}`;
 					try {
-						const response = await fetchWithCorsProxy(listUrl);
-						if (!response.ok) return images;
-						const html = await response.text();
-						const parser = new DOMParser();
-						const doc = parser.parseFromString(html, 'text/html');
-						fileNames = Array.from(doc.querySelectorAll('a[href$=".png"]'))
-							.map(a => a.textContent.trim());
-						_libretroListCache[libretroSystem] = fileNames;
-					} catch (e) { return images; }
+						const response = await fetchWithTimeout(treeUrl);
+						if (response.ok) {
+							const data = await response.json();
+							if (Array.isArray(data.tree) && !data.truncated) {
+								fileNames = data.tree
+									.filter(item => item.type === 'blob' && item.path.toLowerCase().endsWith('.png'))
+									.map(item => item.path);
+							}
+						}
+					} catch (e) { /* try legacy listing fallback */ }
+
+					if (!fileNames || fileNames.length === 0) {
+						const listUrl = `https://thumbnails.libretro.com/${encodeURIComponent(libretroSystem)}/Named_Boxarts/`;
+						try {
+							const response = await fetchWithCorsProxy(listUrl);
+							if (!response.ok) return images;
+							const html = await response.text();
+							const parser = new DOMParser();
+							const doc = parser.parseFromString(html, 'text/html');
+							fileNames = Array.from(doc.querySelectorAll('a[href$=".png"]'))
+								.map(a => a.textContent.trim());
+						} catch (e) { return images; }
+					}
+
+					_libretroListCache[libretroSystem] = fileNames;
 				}
 
 				// Search: match game name against filenames (strip region/version info for matching)
@@ -7196,7 +7253,7 @@
 				  .slice(0, 15);
 
 				for (const { fn } of scored) {
-					const imgUrl = `${baseUrl}/${encodeURIComponent(libretroSystem)}/Named_Boxarts/${encodeURIComponent(fn)}`;
+					const imgUrl = buildLibretroRawImageUrl(libretroSystem, fn);
 					images.push({ thumb: imgUrl, full: imgUrl });
 				}
 				return images;
