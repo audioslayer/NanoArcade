@@ -2594,7 +2594,7 @@
 				<button class="btn-3d purple" onclick="showThemeSelector(); toggleMobileMenu();" style="margin-bottom: 10px;">
 					<span class="icon solid fa-palette"></span> Theme
 				</button>
-				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0</div>
+				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.1</div>
 			</div>
 		</div>
 
@@ -2627,7 +2627,7 @@
 						<li><a href="javascript:void(0);" onclick="showThemeSelector(); return false;"><span class="icon solid fa-palette"></span> Theme</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.1</div>
 			</div>
 		</section>
 
@@ -6015,19 +6015,63 @@
 
 				// Home link with device name - always in homeList
 				const profile = currentDevice ? deviceProfiles[currentDevice] : null;
-				const deviceLabel = profile ? ` <span style="opacity: 0.6; font-size: 0.9em;">- ${profile.emoji} ${profile.name}</span>` : '';
-				homeList.innerHTML = `<li><a href="javascript:void(0)" onclick="showHome()"><span class="icon solid fa-home"></span> Home${deviceLabel}</a></li>`;
+				const homeItem = document.createElement('li');
+				const homeLink = document.createElement('a');
+				homeLink.href = '#';
+				homeLink.dataset.action = 'home';
+				homeLink.addEventListener('click', event => {
+					event.preventDefault();
+					showHome();
+				});
+				const homeIcon = document.createElement('span');
+				homeIcon.className = 'icon solid fa-home';
+				homeLink.append(homeIcon, document.createTextNode(' Home'));
+				if (profile) {
+					const deviceLabel = document.createElement('span');
+					deviceLabel.style.cssText = 'opacity: 0.6; font-size: 0.9em;';
+					deviceLabel.textContent = ` - ${profile.emoji} ${profile.name}`;
+					homeLink.appendChild(deviceLabel);
+				}
+				homeItem.appendChild(homeLink);
+				homeList.replaceChildren(homeItem);
+
+				const createGameCount = (count, missing) => {
+					const countSpan = document.createElement('span');
+					countSpan.className = 'game-count';
+					countSpan.appendChild(document.createTextNode(String(count)));
+					if (missing > 0) {
+						const missingSpan = document.createElement('span');
+						missingSpan.className = 'missing-art-count';
+						missingSpan.title = `${missing} games missing box art`;
+						const imageIcon = document.createElement('span');
+						imageIcon.className = 'icon solid fa-image';
+						missingSpan.append(imageIcon, document.createTextNode(String(missing)));
+						countSpan.append(document.createTextNode(' '), missingSpan);
+					}
+					return countSpan;
+				};
 
 				// Console items go in consoleItemsList
-				let consoleHtml = '';
+				const consoleFragment = document.createDocumentFragment();
 
 				// Add "All Games" option if there are any games
 				if (totalGames > 0) {
-					consoleHtml += `<li><a href="javascript:void(0)" onclick="selectAllGames()">
-						<span class="icon solid fa-gamepad" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 1.5em; flex-shrink: 0;"></span>
-						<span>All Games</span>
-						<span class="game-count">${totalGames}${totalMissing > 0 ? ' <span class="missing-art-count" title="' + totalMissing + ' games missing box art"><span class="icon solid fa-image"></span>' + totalMissing + '</span>' : ''}</span>
-					</a></li>`;
+					const allItem = document.createElement('li');
+					const allLink = document.createElement('a');
+					allLink.href = '#';
+					allLink.dataset.action = 'all-games';
+					allLink.addEventListener('click', event => {
+						event.preventDefault();
+						selectAllGames();
+					});
+					const allIcon = document.createElement('span');
+					allIcon.className = 'icon solid fa-gamepad';
+					allIcon.style.cssText = 'width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 1.5em; flex-shrink: 0;';
+					const allLabel = document.createElement('span');
+					allLabel.textContent = 'All Games';
+					allLink.append(allIcon, allLabel, createGameCount(totalGames, totalMissing));
+					allItem.appendChild(allLink);
+					consoleFragment.appendChild(allItem);
 				}
 
 				// Console entries only
@@ -6036,18 +6080,39 @@
 					const missing = consoles[name].games.filter(g => !g.hasImage).length;
 					const icon = getConsoleIcon(name);
 					const displayName = getConsoleDisplayName(name);
-					consoleHtml += `<li><a href="javascript:void(0)" onclick="selectConsole('${name.replace(/'/g, "\\'")}')">
-						<img src="${icon}" class="console-icon" alt="${displayName}">
-						<span>${displayName}</span>
-						<span class="game-count">${count}${missing > 0 ? ' <span class="missing-art-count" title="' + missing + ' games missing box art"><span class="icon solid fa-image"></span>' + missing + '</span>' : ''}</span>
-					</a></li>`;
+					const item = document.createElement('li');
+					const link = document.createElement('a');
+					link.href = '#';
+					link.dataset.action = 'console';
+					link.dataset.consoleName = name;
+					link.addEventListener('click', event => {
+						event.preventDefault();
+						selectConsole(name);
+					});
+					const iconElement = document.createElement('img');
+					iconElement.src = icon;
+					iconElement.className = 'console-icon';
+					iconElement.alt = displayName;
+					const label = document.createElement('span');
+					label.textContent = displayName;
+					link.append(iconElement, label, createGameCount(count, missing));
+					item.appendChild(link);
+					consoleFragment.appendChild(item);
 				}
 
-				consoleItemsList.innerHTML = consoleHtml;
+				consoleItemsList.replaceChildren(consoleFragment);
 
 				const uploadSelect = document.getElementById('uploadConsoleSelect');
-				uploadSelect.innerHTML = '<option value="">Select a console...</option>' +
-					allFolders.map(n => `<option value="${n}">${getConsoleDisplayName(n)}</option>`).join('');
+				const defaultOption = document.createElement('option');
+				defaultOption.value = '';
+				defaultOption.textContent = 'Select a console...';
+				const folderOptions = allFolders.map(name => {
+					const option = document.createElement('option');
+					option.value = name;
+					option.textContent = getConsoleDisplayName(name);
+					return option;
+				});
+				uploadSelect.replaceChildren(defaultOption, ...folderOptions);
 			}
 
 			function updateStats() {
@@ -6254,7 +6319,10 @@
 				const cards = await Promise.all(filtered.map(async game => {
 					// Handle system group header sentinels
 					if (game.isSystemHeader) {
-						return `<div style="grid-column:1/-1; padding:0.6em 0.4em 0.3em; margin-top:0.75em; font-size:0.9em; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.5); border-bottom:1px solid rgba(255,255,255,0.1);">${game.consoleName}</div>`;
+						const header = document.createElement('div');
+						header.style.cssText = 'grid-column:1/-1; padding:0.6em 0.4em 0.3em; margin-top:0.75em; font-size:0.9em; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.5); border-bottom:1px solid rgba(255,255,255,0.1);';
+						header.textContent = game.consoleName;
+						return header;
 					}
 					let imgSrc = '';
 					// Get the correct handle for this game (important for "All Games" view)
@@ -6337,31 +6405,74 @@
 							}
 						}
 					}
-					// For "All Games" view, include console name in the card
-					const consoleLabel = currentConsole === '__all__' ? `<div class="game-console-label">${gameConsoleName}</div>` : '';
 					// Show subfolder path in tooltip if game is in a subdirectory
 					const gameTitle = game.relativePath && game.relativePath.includes('/')
 						? `${game.baseName} (${game.relativePath.substring(0, game.relativePath.lastIndexOf('/'))})`
 						: game.baseName;
 					// Region flag and ROM tag badges
 					const regionFlag = getRegionFlag(game.name);
-					const flagHtml = regionFlag ? `<span class="region-flag">${regionFlag}</span>` : '';
 					const romTags = getRomTags(game.name);
-					const tagsHtml = romTags.length > 0
-						? `<div class="rom-tags">${romTags.map(t => `<span class="rom-tag" style="background:${t.color}">${t.label}</span>`).join('')}</div>`
-						: '';
-					return `<div class="game-card" onclick="openGameModal('${game.name.replace(/'/g, "\\'")}', '${gameConsoleName.replace(/'/g, "\\'")}')" oncontextmenu="showContextMenu(event, '${game.name.replace(/'/g, "\\'")}', '${gameConsoleName.replace(/'/g, "\\'")}')">
-						<div class="image-container">
-							${imgSrc ? `<img src="${imgSrc}">` : '<span class="no-image">?</span>'}
-							${!game.hasImage ? '<span class="missing-badge">No Image</span>' : ''}
-							${flagHtml}
-						</div>
-						<div class="game-name" title="${gameTitle}">${game.baseName}</div>
-						${tagsHtml}
-						${consoleLabel}
-					</div>`;
+
+					const card = document.createElement('div');
+					card.className = 'game-card';
+					card.addEventListener('click', () => openGameModal(game.name, gameConsoleName));
+					card.addEventListener('contextmenu', event => showContextMenu(event, game.name, gameConsoleName));
+
+					const imageContainer = document.createElement('div');
+					imageContainer.className = 'image-container';
+					if (imgSrc) {
+						const image = document.createElement('img');
+						image.src = imgSrc;
+						imageContainer.appendChild(image);
+					} else {
+						const noImage = document.createElement('span');
+						noImage.className = 'no-image';
+						noImage.textContent = '?';
+						imageContainer.appendChild(noImage);
+					}
+					if (!game.hasImage) {
+						const missingBadge = document.createElement('span');
+						missingBadge.className = 'missing-badge';
+						missingBadge.textContent = 'No Image';
+						imageContainer.appendChild(missingBadge);
+					}
+					if (regionFlag) {
+						const flag = document.createElement('span');
+						flag.className = 'region-flag';
+						flag.textContent = regionFlag;
+						imageContainer.appendChild(flag);
+					}
+					card.appendChild(imageContainer);
+
+					const gameName = document.createElement('div');
+					gameName.className = 'game-name';
+					gameName.title = gameTitle;
+					gameName.textContent = game.baseName;
+					card.appendChild(gameName);
+
+					if (romTags.length > 0) {
+						const tags = document.createElement('div');
+						tags.className = 'rom-tags';
+						for (const tag of romTags) {
+							const badge = document.createElement('span');
+							badge.className = 'rom-tag';
+							badge.style.background = tag.color;
+							badge.textContent = tag.label;
+							tags.appendChild(badge);
+						}
+						card.appendChild(tags);
+					}
+
+					if (currentConsole === '__all__') {
+						const consoleLabel = document.createElement('div');
+						consoleLabel.className = 'game-console-label';
+						consoleLabel.textContent = gameConsoleName;
+						card.appendChild(consoleLabel);
+					}
+
+					return card;
 				}));
-				grid.innerHTML = cards.join('');
+				grid.replaceChildren(...cards);
 				applyGridCols();
 			}
 
@@ -6828,6 +6939,28 @@
 				return new Response(null, { status: 503, statusText: 'All proxies failed' });
 			}
 
+			function normalizeTrustedPickerImageUrl(value) {
+				if (typeof value !== 'string') return null;
+				let candidate = value.trim();
+				if (candidate.startsWith('//')) candidate = `https:${candidate}`;
+
+				try {
+					const url = new URL(candidate);
+					if (url.protocol !== 'https:') return null;
+					const trustedHosts = [
+						'thumbnails.libretro.com',
+						'cdn.thegamesdb.net',
+						'gamefaqs.gamespot.com'
+					];
+					const trusted = trustedHosts.some(host =>
+						url.hostname === host || url.hostname.endsWith(`.${host}`)
+					);
+					return trusted ? url.href : null;
+				} catch {
+					return null;
+				}
+			}
+
 			async function searchImagesInPicker() {
 				const q = document.getElementById('pickerSearchQuery').value.trim();
 				if (!q) return;
@@ -6877,9 +7010,34 @@
 						arr.findIndex(i => i.full === img.full) === idx
 					);
 
-					grid.innerHTML = uniqueImages.slice(0, 30).map(img =>
-						`<img src="${img.thumb}" data-url="${img.full}" onclick="selectPickerImage(this)" ondblclick="selectPickerImage(this); confirmImageSelection();" title="Click to select, double-click to use" onerror="this.style.display='none'">`
-					).join('');
+					const trustedImages = uniqueImages.slice(0, 30)
+						.map(image => ({
+							thumb: normalizeTrustedPickerImageUrl(image.thumb),
+							full: normalizeTrustedPickerImageUrl(image.full)
+						}))
+						.filter(image => image.thumb && image.full);
+
+					if (trustedImages.length === 0) {
+						grid.innerHTML = '<div class="no-results">No trusted images found. Try Google Images instead.</div>';
+						return;
+					}
+
+					const imageElements = trustedImages.map(result => {
+						const image = document.createElement('img');
+						image.src = result.thumb;
+						image.dataset.url = result.full;
+						image.title = 'Click to select, double-click to use';
+						image.addEventListener('click', () => selectPickerImage(image));
+						image.addEventListener('dblclick', () => {
+							selectPickerImage(image);
+							confirmImageSelection();
+						});
+						image.addEventListener('error', () => {
+							image.style.display = 'none';
+						});
+						return image;
+					});
+					grid.replaceChildren(...imageElements);
 				} catch (e) {
 					grid.innerHTML = '<div class="no-results">Search unavailable. Try Google Images instead.</div>';
 				}
@@ -7661,7 +7819,13 @@
 					const row = document.createElement('div');
 					row.style.cssText = 'padding: 0.25em 0.5em; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; gap: 0.5em;';
 					const displayName = game.name.length > 55 ? game.name.substring(0, 52) + '…' : game.name;
-					row.innerHTML = `<span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:rgba(255,255,255,0.75);">${displayName}</span><span style="color:rgba(255,255,255,0.4); flex-shrink:0;">⏳</span>`;
+					const nameSpan = document.createElement('span');
+					nameSpan.style.cssText = 'flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:rgba(255,255,255,0.75);';
+					nameSpan.textContent = displayName;
+					const statusSpan = document.createElement('span');
+					statusSpan.style.cssText = 'color:rgba(255,255,255,0.4); flex-shrink:0;';
+					statusSpan.textContent = '⏳';
+					row.append(nameSpan, statusSpan);
 					progress.appendChild(row);
 					progress.scrollTop = progress.scrollHeight;
 
@@ -7698,7 +7862,6 @@
 					}
 
 					done++;
-					const statusSpan = row.querySelector('span:last-child');
 					statusSpan.textContent = success ? '✅' : '❌';
 					statusSpan.style.color = success ? '#22c55e' : '#ef4444';
 					summary.textContent = `Scraped ${done} / ${games.length} — Found: ${found}`;
@@ -7963,7 +8126,10 @@
 			function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
 			function showAlert(message, title = 'Information', buttons = null) {
-				document.getElementById('alertModalTitle').innerHTML = `<span class="icon solid fa-info-circle"></span> ${title}`;
+				const titleElement = document.getElementById('alertModalTitle');
+				const titleIcon = document.createElement('span');
+				titleIcon.className = 'icon solid fa-info-circle';
+				titleElement.replaceChildren(titleIcon, document.createTextNode(` ${title}`));
 				document.getElementById('alertModalMessage').textContent = message;
 
 				// Set custom buttons if provided
@@ -8002,12 +8168,24 @@
 				if (!homeList || !consoleItemsList) return;
 
 				// Clone both home and console items for mobile
-				mobileList.innerHTML = homeList.innerHTML + consoleItemsList.innerHTML;
+				const fragment = document.createDocumentFragment();
+				for (const item of [...homeList.children, ...consoleItemsList.children]) {
+					fragment.appendChild(item.cloneNode(true));
+				}
+				mobileList.replaceChildren(fragment);
 
-				// Add click handlers to close menu
+				// Rebind navigation handlers because cloned nodes do not retain listeners
 				const mobileLinks = mobileList.querySelectorAll('a');
 				mobileLinks.forEach(link => {
-					link.addEventListener('click', () => {
+					link.addEventListener('click', event => {
+						event.preventDefault();
+						if (link.dataset.action === 'home') {
+							showHome();
+						} else if (link.dataset.action === 'all-games') {
+							selectAllGames();
+						} else if (link.dataset.action === 'console') {
+							selectConsole(link.dataset.consoleName);
+						}
 						toggleMobileMenu();
 					});
 				});
@@ -8238,7 +8416,13 @@
 
 				} catch (error) {
 					console.error('Migration error:', error);
-					document.getElementById('migrationStatus').innerHTML = `<span style="color: #ef4444;"><span class="icon solid fa-exclamation-circle"></span> Error: ${error.message}</span>`;
+					const migrationStatus = document.getElementById('migrationStatus');
+					const errorMessage = document.createElement('span');
+					errorMessage.style.color = '#ef4444';
+					const errorIcon = document.createElement('span');
+					errorIcon.className = 'icon solid fa-exclamation-circle';
+					errorMessage.append(errorIcon, document.createTextNode(` Error: ${error.message}`));
+					migrationStatus.replaceChildren(errorMessage);
 				}
 			}
 
@@ -8529,7 +8713,16 @@
 				for (const file of files) {
 					const clean = cleanGameName(file.name);
 					filesToUpload.push({ file, originalName: file.name, cleanName: clean });
-					list.innerHTML += `<div class="file-item"><span class="original">${file.name}</span><span class="clean">→ ${clean}</span></div>`;
+					const item = document.createElement('div');
+					item.className = 'file-item';
+					const original = document.createElement('span');
+					original.className = 'original';
+					original.textContent = file.name;
+					const cleaned = document.createElement('span');
+					cleaned.className = 'clean';
+					cleaned.textContent = `→ ${clean}`;
+					item.append(original, cleaned);
+					list.appendChild(item);
 				}
 			}
 
@@ -8860,31 +9053,58 @@
 					}
 
 					// Display saves
-					let html = '';
+					const saveFragment = document.createDocumentFragment();
 					for (const save of saves) {
 						const date = new Date(save.modified).toLocaleDateString();
 						const size = (save.size / 1024).toFixed(1) + ' KB';
-						html += `
-							<div style="display: flex; align-items: center; padding: 0.75em; background: rgba(34, 211, 238, 0.1); border-radius: 8px; margin-bottom: 0.5em;">
-								<span class="icon solid fa-save" style="color: #22d3ee; margin-right: 0.75em; font-size: 1.2em;"></span>
-								<div style="flex: 1;">
-									<div style="font-weight: 500;">${save.name}</div>
-									<div style="font-size: 0.8em; color: rgba(255,255,255,0.5);">${size} • ${date}</div>
-								</div>
-								<button class="btn-3d small" onclick="downloadSave('${save.name}')" title="Download">
-									<span class="icon solid fa-download"></span>
-								</button>
-								<button class="btn-3d small red" onclick="event.stopPropagation(); deleteSave('${save.name}')" title="Delete" style="margin-left: 0.25em;">
-									<span class="icon solid fa-trash"></span>
-								</button>
-							</div>
-						`;
+						const row = document.createElement('div');
+						row.style.cssText = 'display: flex; align-items: center; padding: 0.75em; background: rgba(34, 211, 238, 0.1); border-radius: 8px; margin-bottom: 0.5em;';
+
+						const saveIcon = document.createElement('span');
+						saveIcon.className = 'icon solid fa-save';
+						saveIcon.style.cssText = 'color: #22d3ee; margin-right: 0.75em; font-size: 1.2em;';
+
+						const details = document.createElement('div');
+						details.style.flex = '1';
+						const name = document.createElement('div');
+						name.style.fontWeight = '500';
+						name.textContent = save.name;
+						const metadata = document.createElement('div');
+						metadata.style.cssText = 'font-size: 0.8em; color: rgba(255,255,255,0.5);';
+						metadata.textContent = `${size} • ${date}`;
+						details.append(name, metadata);
+
+						const downloadButton = document.createElement('button');
+						downloadButton.className = 'btn-3d small';
+						downloadButton.title = 'Download';
+						const downloadIcon = document.createElement('span');
+						downloadIcon.className = 'icon solid fa-download';
+						downloadButton.appendChild(downloadIcon);
+						downloadButton.addEventListener('click', () => downloadSave(save.name));
+
+						const deleteButton = document.createElement('button');
+						deleteButton.className = 'btn-3d small red';
+						deleteButton.title = 'Delete';
+						deleteButton.style.marginLeft = '0.25em';
+						const deleteIcon = document.createElement('span');
+						deleteIcon.className = 'icon solid fa-trash';
+						deleteButton.appendChild(deleteIcon);
+						deleteButton.addEventListener('click', event => {
+							event.stopPropagation();
+							deleteSave(save.name);
+						});
+
+						row.append(saveIcon, details, downloadButton, deleteButton);
+						saveFragment.appendChild(row);
 					}
-					list.innerHTML = html;
+					list.replaceChildren(saveFragment);
 
 				} catch (e) {
 					console.error('Error loading saves:', e);
-					list.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6); padding: 2em;">Error loading saves: ' + e.message + '</p>';
+					const errorMessage = document.createElement('p');
+					errorMessage.style.cssText = 'text-align: center; color: rgba(255,255,255,0.6); padding: 2em;';
+					errorMessage.textContent = `Error loading saves: ${e.message}`;
+					list.replaceChildren(errorMessage);
 				}
 			}
 
@@ -8915,7 +9135,19 @@
 
 			function deleteSave(saveName) {
 				pendingDeleteSave = saveName;
-				document.getElementById('deleteSaveConfirmText').innerHTML = `Are you sure you want to delete <strong>"${saveName}"</strong>?<br><span style="font-size: 0.85em; color: rgba(255,255,255,0.6);">This cannot be undone.</span>`;
+				const confirmation = document.getElementById('deleteSaveConfirmText');
+				const fileName = document.createElement('strong');
+				fileName.textContent = `"${saveName}"`;
+				const warning = document.createElement('span');
+				warning.style.cssText = 'font-size: 0.85em; color: rgba(255,255,255,0.6);';
+				warning.textContent = 'This cannot be undone.';
+				confirmation.replaceChildren(
+					document.createTextNode('Are you sure you want to delete '),
+					fileName,
+					document.createTextNode('?'),
+					document.createElement('br'),
+					warning
+				);
 				document.getElementById('deleteSaveModal').classList.add('active');
 			}
 
