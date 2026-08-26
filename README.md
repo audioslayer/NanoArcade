@@ -12,6 +12,14 @@ Or download this repository for offline use.
 
 ---
 
+## Save-Preserving Renames in v2.0.4
+
+- Keeps Onion OS in-game saves linked when a ROM is renamed
+- Renames matching automatic and numbered save states, including state thumbnails
+- Detects save-name conflicts and rolls back save changes if the ROM rename fails
+
+---
+
 ## TheGamesDB & PWA Hotfix in v2.0.3
 
 - Restores saving artwork selected from TheGamesDB without relying on the failing general-purpose CORS proxy
@@ -194,7 +202,7 @@ MinUI fork with enhanced features and 3 resolution tiers:
 - **Batch Upload** - Upload multiple ROMs with automatic filename cleaning
 - **Right-Click Menu** - Quick actions: edit art, search, rename, delete
 - **Google Images Integration** - One-click search for hard-to-find artwork
-- **Rename & Delete** - Manage your ROM files directly
+- **Rename & Delete** - Manage ROM files directly; Onion OS renames also keep matching saves and save states linked to the new ROM name
 
 ### :sparkles: User Experience
 - **Responsive Design** - Mobile-friendly hamburger menu for screens ≤1292px
@@ -305,6 +313,12 @@ The app recognizes and displays icons for:
 - JavaScript enabled
 
 ## Changelog
+
+### v2.0.4 - Save-Preserving Renames
+- **Onion OS Saves Preserved** - Renaming a ROM also renames its matching `.srm` save in the mapped emulator core folder.
+- **Save States Preserved** - Automatic states, numbered slots, and state thumbnails follow the new ROM name.
+- **Safer Rename Workflow** - Existing destination files are protected and companion-file changes are rolled back if the ROM rename fails.
+- **Cache Refresh** - The service-worker cache version was bumped so installed users receive the feature update.
 
 ### v2.0.3 - TheGamesDB & PWA Hotfix
 - **TheGamesDB Downloads Restored** - Selected artwork downloads through a CORS-enabled image cache restricted to TheGamesDB's trusted HTTPS image path.

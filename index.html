@@ -2595,7 +2595,7 @@
 				<button class="btn-3d purple" onclick="showThemeSelector(); toggleMobileMenu();" style="margin-bottom: 10px;">
 					<span class="icon solid fa-palette"></span> Theme
 				</button>
-				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.3</div>
+				<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.4</div>
 			</div>
 		</div>
 
@@ -2628,7 +2628,7 @@
 						<li><a href="javascript:void(0);" onclick="showThemeSelector(); return false;"><span class="icon solid fa-palette"></span> Theme</a></li>
 					</ul>
 				</nav>
-				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.3</div>
+				<div style="position: absolute; bottom: 15px; left: 15px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">Version 2.0.4</div>
 			</div>
 		</section>
 
@@ -7696,6 +7696,87 @@
 				}
 			}
 
+			async function copyAndRemoveFile(directory, oldName, newName) {
+				const oldHandle = await directory.getFileHandle(oldName);
+				const oldFile = await oldHandle.getFile();
+				const newHandle = await directory.getFileHandle(newName, { create: true });
+				const writer = await newHandle.createWritable();
+
+				try {
+					await writer.write(await oldFile.arrayBuffer());
+					await writer.close();
+					await directory.removeEntry(oldName);
+				} catch (error) {
+					if (typeof writer.abort === 'function') {
+						await writer.abort().catch(() => {});
+					}
+					await directory.removeEntry(newName).catch(() => {});
+					throw error;
+				}
+			}
+
+			async function collectOnionRenameOperations(consoleName, oldBaseName, newBaseName) {
+				if (!isOnionOS(currentDevice)) return [];
+
+				const emulator = getEmulatorForConsole(consoleName, currentDevice);
+				if (!emulator) return [];
+
+				const operations = [];
+				const locations = [
+					{
+						handle: await getSaveFolderHandle(currentDevice, emulator, false),
+						matches: suffix => suffix.toLowerCase() === '.srm',
+						label: 'save'
+					},
+					{
+						handle: await getStateFolderHandle(currentDevice, emulator, false),
+						matches: suffix => /^\.state(?:\.auto|\d+)?(?:\.png)?$/i.test(suffix),
+						label: 'save state'
+					}
+				];
+
+				for (const location of locations) {
+					if (!location.handle) continue;
+
+					for await (const entry of location.handle.values()) {
+						if (entry.kind !== 'file' || !entry.name.startsWith(oldBaseName)) continue;
+
+						const suffix = entry.name.substring(oldBaseName.length);
+						if (!location.matches(suffix)) continue;
+
+						const newFileName = newBaseName + suffix;
+						let destinationExists = false;
+						try {
+							await location.handle.getFileHandle(newFileName);
+							destinationExists = true;
+						} catch (error) {
+							if (error.name !== 'NotFoundError') throw error;
+						}
+						if (destinationExists) {
+							throw new Error(`Cannot rename ${location.label}: "${newFileName}" already exists.`);
+						}
+
+						operations.push({
+							directory: location.handle,
+							oldName: entry.name,
+							newName: newFileName
+						});
+					}
+				}
+
+				return operations;
+			}
+
+			async function rollbackRenameOperations(completedOperations) {
+				for (const operation of completedOperations.reverse()) {
+					try {
+						await copyAndRemoveFile(operation.directory, operation.newName, operation.oldName);
+					} catch (error) {
+						console.error('Could not roll back renamed save data:', error);
+					}
+				}
+			}
+
 			async function executeRename() {
 				const targetConsole = renameConsole || currentConsole;
 				if (!renameTarget || !targetConsole) return;
@@ -7734,10 +7815,19 @@
 				status.style.display = 'block';
 				status.className = 'status-msg';
 
+				const completedCompanionRenames = [];
+
 				try {
 					const consoleHandle = consoles[targetConsole].handle;
 					const profile = deviceProfiles[currentDevice];
 					let imageHandle;
+					const companionRenames = await collectOnionRenameOperations(targetConsole, oldBaseName, newName);
+
+					// Rename save data first. If the ROM rename fails, these changes are rolled back.
+					for (const operation of companionRenames) {
+						await copyAndRemoveFile(operation.directory, operation.oldName, operation.newName);
+						completedCompanionRenames.push(operation);
+					}
 
 					// Determine the correct image handle based on device type
 					if (profile.catalogueStructure) {
@@ -7814,7 +7904,9 @@
 					}
 
 					status.className = 'status-msg success';
-					status.textContent = 'Renamed successfully!';
+					status.textContent = completedCompanionRenames.length > 0
+						? `Renamed successfully! Updated ${completedCompanionRenames.length} save file${completedCompanionRenames.length === 1 ? '' : 's'}.`
+						: 'Renamed successfully!';
 
 					// Refresh after short delay
 					setTimeout(async () => {
@@ -7837,6 +7929,7 @@
 					}, 500);
 
 				} catch (e) {
+					await rollbackRenameOperations(completedCompanionRenames);
 					status.className = 'status-msg error';
 					status.textContent = 'Error: ' + e.message;
 				}
@@ -9061,6 +9154,20 @@
 					if (!dataHandle) return null;
 					return await dataHandle.getDirectoryHandle(emulator, { create }).catch(() => null);
 				}
+			}
+
+			// Get the save-state folder handle for devices with a separate state directory.
+			async function getStateFolderHandle(deviceType, emulator, create = false) {
+				if (!isOnionOS(deviceType)) return null;
+
+				// Onion OS: Saves/CurrentProfile/states/[emulator]/
+				const savesHandle = await directoryHandle.getDirectoryHandle('Saves', { create }).catch(() => null);
+				if (!savesHandle) return null;
+				const profileHandle = await savesHandle.getDirectoryHandle('CurrentProfile', { create }).catch(() => null);
+				if (!profileHandle) return null;
+				const statesFolderHandle = await profileHandle.getDirectoryHandle('states', { create }).catch(() => null);
+				if (!statesFolderHandle) return null;
+				return await statesFolderHandle.getDirectoryHandle(emulator, { create }).catch(() => null);
 			}
 
 			function getSaveLocationText(deviceType, emulator) {
